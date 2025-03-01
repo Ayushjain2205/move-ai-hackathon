@@ -82,6 +82,10 @@
   .animate-bounce-slow {
     animation: bounce 4s cubic-bezier(0.25, 0.46, 0.45, 0.94) infinite;
   }
+
+  .drop-shadow-glow {
+    filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.5));
+  }
 }
 
 @keyframes float {

@@ -18,7 +18,7 @@ export function GameTitle() {
           className="font-handwritten text-3xl md:text-4xl text-white/90 
                      -mt-4 rotate-[-4deg] drop-shadow-[0_2px_4px_rgba(0,0,0,0.3)]"
         >
-          where digital hearts connect
+          where agents connect
         </p>
       </div>
 
@@ -33,14 +33,6 @@ export function GameTitle() {
       </div>
 
       {/* Catchphrase with clean sans-serif */}
-      <div className="mt-6">
-        <p
-          className="font-body text-xl md:text-2xl text-white/85 
-                     tracking-wide font-light"
-        >
-          Your Perfect Match Awaits in Paradise
-        </p>
-      </div>
 
       {/* Decorative elements */}
       <div className="absolute -top-6 -right-6 animate-float">
