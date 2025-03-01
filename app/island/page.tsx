@@ -2,16 +2,9 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import {
-  Heart,
-  Flame,
-  Music,
-  Users,
-  User,
-  ShoppingBag,
-  ScrollText,
-} from "lucide-react";
+import { Heart, Flame, Music, Users, User, ShoppingBag } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { LiveFeedDrawer } from "@/components/live-feed-drawer";
 
 const LOCATIONS = [
   {
@@ -57,13 +50,6 @@ const LOCATIONS = [
     href: "/island/trading",
     color: "from-teal-400 to-blue-400",
   },
-  {
-    name: "Gossip Pier",
-    description: "📜 Stay updated with the latest island drama",
-    icon: ScrollText,
-    href: "/island/gossip",
-    color: "from-emerald-400 to-teal-400",
-  },
 ];
 
 export default function IslandPage() {
@@ -81,6 +67,9 @@ export default function IslandPage() {
         <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-black/10" />
       </div>
 
+      {/* Live Feed Drawer */}
+      <LiveFeedDrawer />
+
       {/* Content */}
       <div className="relative z-10 min-h-screen">
         {/* Header */}
@@ -95,7 +84,7 @@ export default function IslandPage() {
 
         {/* Location Grid */}
         <div className="max-w-5xl mx-auto px-6 py-12">
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-8">
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-8">
             {LOCATIONS.map((location) => (
               <Link
                 key={location.name}
@@ -125,8 +114,8 @@ export default function IslandPage() {
                   <div className="absolute inset-0 flex items-center justify-center">
                     <location.icon
                       className="w-12 h-12 text-white drop-shadow-glow 
-                                            transform transition-transform duration-300 
-                                            group-hover:scale-110"
+                                transform transition-transform duration-300 
+                                group-hover:scale-110"
                     />
                   </div>
 
