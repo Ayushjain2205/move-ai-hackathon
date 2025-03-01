@@ -8,27 +8,15 @@ import { useRouter } from "next/navigation";
 
 export default function LandingPage() {
   const router = useRouter();
-  const [showSplash, setShowSplash] = useState(true);
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setShowSplash(false);
-    }, 2000);
-    return () => clearTimeout(timer);
-  }, []);
-
-  if (showSplash) {
-    return (
-      <div className="fixed inset-0 bg-gradient-to-b from-pink-400 to-purple-600 flex items-center justify-center">
-        <div className="animate-bounce">
-          <Heart className="w-24 h-24 text-white animate-pulse" />
-        </div>
-      </div>
-    );
-  }
+  const [imageLoaded, setImageLoaded] = useState(false);
 
   return (
     <div className="relative min-h-screen overflow-hidden">
+      {/* Gradient shown while image is loading */}
+      {!imageLoaded && (
+        <div className="fixed inset-0 bg-gradient-to-b from-pink-400 to-purple-600 z-0" />
+      )}
+
       {/* Background Image */}
       <div className="fixed inset-0 z-0">
         <Image
@@ -37,6 +25,7 @@ export default function LandingPage() {
           fill
           className="object-cover object-center"
           priority
+          onLoad={() => setImageLoaded(true)}
         />
         {/* Overlay for better text readability */}
         <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-transparent to-black/30" />
@@ -65,19 +54,19 @@ export default function LandingPage() {
           >
             {/* Button shadow/border effect */}
             <div
-              className="absolute inset-0 rounded-xl translate-y-2 bg-black/20 transition-transform 
-                          group-hover:translate-y-1.5 group-active:translate-y-0.5"
+              className="absolute inset-0 rounded-xl translate-y-2 bg-black/20 transition-transform
+                           group-hover:translate-y-1.5 group-active:translate-y-0.5"
             />
 
             {/* Main button */}
             <div
-              className="relative transform transition-all duration-200 
-                          group-active:translate-y-1"
+              className="relative transform transition-all duration-200
+                           group-active:translate-y-1"
             >
               <div className="bg-gradient-to-r from-pink-500 via-rose-500 to-pink-500 p-0.5 rounded-xl">
                 <div
-                  className="bg-gradient-to-b from-white/20 to-transparent backdrop-blur-sm rounded-lg 
-                              border-2 border-white/30 shadow-[0_0_20px_rgba(255,255,255,0.3)]
+                  className="bg-gradient-to-b from-white/20 to-transparent backdrop-blur-sm rounded-lg
+                               border-2 border-white/30 shadow-[0_0_20px_rgba(255,255,255,0.3)]
                               px-8 py-3 text-center"
                 >
                   <span className="font-title text-2xl text-white drop-shadow-glow">
@@ -90,8 +79,8 @@ export default function LandingPage() {
             {/* Shine effect */}
             <div className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500">
               <div
-                className="absolute inset-0 translate-x-[-100%] group-hover:translate-x-[100%] 
-                            bg-gradient-to-r from-transparent via-white/10 to-transparent
+                className="absolute inset-0 translate-x-[-100%] group-hover:translate-x-[100%]
+                             bg-gradient-to-r from-transparent via-white/10 to-transparent
                             transition-transform duration-1000"
               />
             </div>
