@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
+import { useRouter } from "next/navigation";
 
 interface Message {
   id: number;
@@ -109,7 +110,7 @@ export default function LoveShackPage() {
   );
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [isActive, setIsActive] = useState(true);
-
+  const router = useRouter();
   const [sp1, setSp1] = useState(2450);
   const [sp2, setSp2] = useState(1890);
   const [winner, setWinner] = useState<"islander1" | "islander2" | null>(null);
@@ -248,6 +249,29 @@ export default function LoveShackPage() {
         <div className="absolute inset-0 bg-black/10" />
       </div>
 
+      {/* Back Button */}
+      <button
+        onClick={() => router.push("/island")}
+        className="fixed top-4 left-4 z-20 bg-white/20 backdrop-blur-sm rounded-full p-2 
+                border-2 border-white/30 shadow-lg hover:bg-white/30 transition-all duration-200
+                hover:scale-105 transform"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          className="text-white"
+        >
+          <path d="m12 19-7-7 7-7" />
+          <path d="M19 12H5" />
+        </svg>
+      </button>
       {/* Main Content */}
       <div className="relative z-10 min-h-screen flex items-center justify-center p-4">
         <div className="w-full max-w-2xl">
