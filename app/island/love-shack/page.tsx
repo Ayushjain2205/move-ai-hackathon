@@ -134,12 +134,12 @@ export default function LoveShackPage() {
     ]);
   }, []);
 
-  // Scroll to bottom when messages change
+  // Scroll to bottom when messages change or typing state changes
   useEffect(() => {
     if (messagesEndRef.current) {
       messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
     }
-  }, [messages]);
+  }, [messages, isTyping]);
 
   // Main chat logic
   useEffect(() => {
@@ -568,11 +568,11 @@ export default function LoveShackPage() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   className={cn(
-                    "flex gap-2 items-center",
+                    "flex my-4",
                     isTyping === "islander2" ? "justify-end" : "justify-start"
                   )}
                 >
-                  <div className="bg-white/10 backdrop-blur-sm rounded-full px-3 py-2 flex items-center gap-2">
+                  <div className="bg-white/10 backdrop-blur-sm rounded-full py-3 px-4">
                     <div className="flex gap-1">
                       <span className="w-2 h-2 bg-white/50 rounded-full animate-bounce" />
                       <span
@@ -584,15 +584,12 @@ export default function LoveShackPage() {
                         style={{ animationDelay: "0.4s" }}
                       />
                     </div>
-                    <span className="text-xs font-display text-white/70">
-                      typing...
-                    </span>
                   </div>
                 </motion.div>
               )}
 
               {/* Invisible div for auto-scrolling */}
-              <div ref={messagesEndRef} />
+              <div ref={messagesEndRef} className="h-px" />
             </div>
           </div>
         </div>
