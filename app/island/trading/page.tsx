@@ -124,6 +124,7 @@ export default function TradingPostPage() {
   const [categoryFilter, setCategoryFilter] = useState<CategoryFilter>("all");
   const [typeFilter, setTypeFilter] = useState<TypeFilter>("all");
   const [purchasing, setPurchasing] = useState<string | null>(null);
+  const [imageLoaded, setImageLoaded] = useState(false);
 
   const filteredItems = SHOP_ITEMS.filter((item) => {
     if (categoryFilter !== "all" && item.category !== categoryFilter)
@@ -142,6 +143,11 @@ export default function TradingPostPage() {
 
   return (
     <div className="relative min-h-screen overflow-hidden">
+      {/* Gradient shown while image is loading */}
+      {!imageLoaded && (
+        <div className="fixed inset-0 bg-gradient-to-b from-teal-500 to-blue-600 z-0" />
+      )}
+
       {/* Background Image */}
       <div className="fixed inset-0 z-0">
         <Image
@@ -150,6 +156,7 @@ export default function TradingPostPage() {
           fill
           className="object-cover"
           priority
+          onLoad={() => setImageLoaded(true)}
         />
         <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/10 to-black/30" />
       </div>

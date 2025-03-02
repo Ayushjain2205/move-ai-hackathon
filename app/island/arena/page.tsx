@@ -4,12 +4,19 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { ArrowLeft, Flame, Trophy, Timer, Sparkles } from "lucide-react";
+import { useState } from "react";
 
 export default function ArenaPage() {
   const router = useRouter();
+  const [imageLoaded, setImageLoaded] = useState(false);
 
   return (
     <div className="relative min-h-screen overflow-hidden">
+      {/* Gradient shown while image is loading */}
+      {!imageLoaded && (
+        <div className="fixed inset-0 bg-gradient-to-b from-orange-500 to-red-600 z-0" />
+      )}
+
       {/* Background Image */}
       <div className="fixed inset-0 z-0">
         <Image
@@ -18,6 +25,7 @@ export default function ArenaPage() {
           fill
           className="object-cover"
           priority
+          onLoad={() => setImageLoaded(true)}
         />
         <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/10 to-black/30" />
       </div>

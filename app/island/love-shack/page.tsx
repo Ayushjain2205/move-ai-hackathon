@@ -117,6 +117,7 @@ export default function LoveShackPage() {
   const [timeLeft, setTimeLeft] = useState(30);
   const lastSenderRef = useRef<"islander1" | "islander2">("islander1");
   const timeLeftRef = useRef(timeLeft);
+  const [imageLoaded, setImageLoaded] = useState(false);
 
   // Update timeLeftRef when timeLeft changes
   useEffect(() => {
@@ -237,6 +238,11 @@ export default function LoveShackPage() {
 
   return (
     <div className="relative min-h-screen overflow-hidden">
+      {/* Gradient shown while image is loading */}
+      {!imageLoaded && (
+        <div className="fixed inset-0 bg-gradient-to-b from-pink-500 to-rose-600 z-0" />
+      )}
+
       {/* Background Image */}
       <div className="fixed inset-0 z-0">
         <Image
@@ -245,6 +251,7 @@ export default function LoveShackPage() {
           fill
           className="object-cover"
           priority
+          onLoad={() => setImageLoaded(true)}
         />
         <div className="absolute inset-0 bg-black/10" />
       </div>

@@ -145,6 +145,7 @@ export default function RetreatPage() {
     null
   );
   const [timeLeft, setTimeLeft] = useState<number | null>(null);
+  const [imageLoaded, setImageLoaded] = useState(false);
 
   // Simulate active training countdown
   useEffect(() => {
@@ -184,6 +185,11 @@ export default function RetreatPage() {
 
   return (
     <div className="relative min-h-screen overflow-hidden">
+      {/* Gradient shown while image is loading */}
+      {!imageLoaded && (
+        <div className="fixed inset-0 bg-gradient-to-b from-blue-500 to-indigo-600 z-0" />
+      )}
+
       {/* Background Image */}
       <div className="fixed inset-0 z-0">
         <Image
@@ -192,6 +198,7 @@ export default function RetreatPage() {
           fill
           className="object-cover"
           priority
+          onLoad={() => setImageLoaded(true)}
         />
         <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/10 to-black/30" />
       </div>

@@ -182,6 +182,7 @@ export default function SunsetClubPage() {
   const [typeFilter, setTypeFilter] = useState<TypeFilter>("all");
   const [genderFilter, setGenderFilter] = useState<GenderFilter>("all");
   const [nudging, setNudging] = useState<string | null>(null);
+  const [imageLoaded, setImageLoaded] = useState(false);
 
   const filteredProfiles = ISLANDER_PROFILES.filter((profile) => {
     if (statusFilter !== "all" && profile.status !== statusFilter) return false;
@@ -205,6 +206,11 @@ export default function SunsetClubPage() {
 
   return (
     <div className="relative min-h-screen overflow-hidden">
+      {/* Gradient shown while image is loading */}
+      {!imageLoaded && (
+        <div className="fixed inset-0 bg-gradient-to-b from-purple-500 to-pink-600 z-0" />
+      )}
+
       {/* Background Image */}
       <div className="fixed inset-0 z-0">
         <Image
@@ -213,6 +219,7 @@ export default function SunsetClubPage() {
           fill
           className="object-cover"
           priority
+          onLoad={() => setImageLoaded(true)}
         />
         <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/10 to-black/30" />
       </div>
