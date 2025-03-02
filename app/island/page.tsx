@@ -30,10 +30,10 @@ const LOCATIONS = [
     color: "from-purple-400 to-pink-400",
   },
   {
-    name: "Tribal Council",
-    description: "👥 Cast your votes and witness eliminations",
+    name: "Arrival Dock",
+    description: "🌊 Welcome new islanders to paradise",
     icon: Users,
-    href: "/island/council",
+    href: "/island/arrival-dock",
     color: "from-indigo-400 to-purple-400",
   },
   {
