@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import {
   Heart,
@@ -108,52 +108,124 @@ export default function LoveShackPage() {
     null
   );
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const [isActive, setIsActive] = useState(true);
 
-  const scrollToBottom = useCallback(() => {
-    if (messagesEndRef.current) {
-      messagesEndRef.current.scrollIntoView({
-        behavior: "smooth",
-        block: "end",
-      });
-    }
+  const [sp1, setSp1] = useState(2450);
+  const [sp2, setSp2] = useState(1890);
+  const [winner, setWinner] = useState<"islander1" | "islander2" | null>(null);
+  const [timeLeft, setTimeLeft] = useState(30);
+  const lastSenderRef = useRef<"islander1" | "islander2">("islander1");
+  const timeLeftRef = useRef(timeLeft);
+
+  // Update timeLeftRef when timeLeft changes
+  useEffect(() => {
+    timeLeftRef.current = timeLeft;
+  }, [timeLeft]);
+
+  // Add initial message
+  useEffect(() => {
+    setMessages([
+      {
+        id: Date.now(),
+        sender: "islander1",
+        text: "Hey there! Ready to chat? 💖",
+        timestamp: new Date().toLocaleTimeString(),
+      },
+    ]);
   }, []);
 
+  // Scroll to bottom when messages change
   useEffect(() => {
-    scrollToBottom();
-  }, [messages, isTyping, scrollToBottom]);
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [messages]);
 
+  // Main chat logic
   useEffect(() => {
-    const interval = setInterval(() => {
-      const sender = Math.random() > 0.5 ? "islander1" : "islander2";
+    console.log("Chat effect running, isActive:", isActive);
+
+    if (!isActive) {
+      console.log("Chat effect stopped - inactive");
+      return;
+    }
+
+    let isComponentMounted = true;
+
+    const addMessage = () => {
+      if (!isComponentMounted || timeLeftRef.current === 0) return;
+
+      const sender: "islander1" | "islander2" =
+        lastSenderRef.current === "islander1" ? "islander2" : "islander1";
+
+      console.log("Setting typing indicator for:", sender);
       setIsTyping(sender);
 
       setTimeout(() => {
+        if (!isComponentMounted || timeLeftRef.current === 0) {
+          setIsTyping(null);
+          return;
+        }
+
+        console.log("Adding new message from:", sender);
         const newMessage: Message = {
           id: Date.now(),
           sender,
           text: CONVERSATIONS[currentVibe][
             Math.floor(Math.random() * CONVERSATIONS[currentVibe].length)
           ],
-          timestamp: new Date().toLocaleTimeString("en-US", {
-            hour: "numeric",
-            minute: "2-digit",
-            hour12: true,
-          }),
+          timestamp: new Date().toLocaleTimeString(),
         };
 
-        setMessages((prev) => [...prev.slice(-4), newMessage]);
+        setMessages((prev) => [...prev, newMessage]);
         setIsTyping(null);
+        lastSenderRef.current = sender;
 
+        // Maybe change vibe
         if (Math.random() < 0.2) {
           const vibes = Object.keys(VIBES) as VibeType[];
           const newVibe = vibes[Math.floor(Math.random() * vibes.length)];
           setCurrentVibe(newVibe);
         }
-      }, 1500);
-    }, 4000);
+      }, 1000);
+    };
 
-    return () => clearInterval(interval);
-  }, [currentVibe]);
+    console.log("Setting up message interval");
+    const interval = setInterval(addMessage, 2500);
+
+    // Trigger first message immediately
+    addMessage();
+
+    return () => {
+      console.log("Cleaning up chat effect");
+      isComponentMounted = false;
+      clearInterval(interval);
+    };
+  }, [isActive, currentVibe]); // Removed timeLeft from dependencies
+
+  // Timer logic
+  useEffect(() => {
+    if (timeLeft > 0) {
+      const timer = setInterval(() => {
+        setTimeLeft((prev) => prev - 1);
+      }, 1000);
+
+      return () => clearInterval(timer);
+    } else if (timeLeft === 0 && !winner) {
+      setIsActive(false);
+      setIsTyping(null);
+      const randomWinner = Math.random() > 0.5 ? "islander1" : "islander2";
+      setWinner(randomWinner);
+
+      if (randomWinner === "islander1") {
+        setSp1((prev) => prev + 100);
+        setSp2((prev) => prev - 50);
+      } else {
+        setSp1((prev) => prev - 50);
+        setSp2((prev) => prev + 100);
+      }
+    }
+  }, [timeLeft, winner]);
 
   const renderIcon = (
     IconComponent: typeof Heart,
@@ -179,47 +251,108 @@ export default function LoveShackPage() {
       {/* Main Content */}
       <div className="relative z-10 min-h-screen flex items-center justify-center p-4">
         <div className="w-full max-w-2xl">
-          {/* Islander 1 Avatar */}
-          <motion.div
-            initial={{ scale: 0, x: -50 }}
-            animate={{ scale: 1, x: 0 }}
-            transition={{ type: "spring", duration: 0.8 }}
-            className="absolute left-4 top-4"
-          >
-            <div className="relative">
-              <div className="w-20 h-20 rounded-full overflow-hidden border-4 border-white/50 shadow-lg">
-                <Image
-                  src="/placeholder.svg?height=80&width=80"
-                  width={80}
-                  height={80}
-                  alt="Islander 1"
-                  className="object-cover"
-                />
+          {/* Avatars and VS Badge */}
+          <div className="flex items-center justify-between mb-4">
+            {/* Islander 1 Avatar */}
+            <div className="flex flex-col items-center gap-2">
+              <div className="relative">
+                <div className="w-16 h-16 rounded-full overflow-hidden border-4 border-white/50 shadow-lg">
+                  <Image
+                    src="/placeholder.svg?height=64&width=64"
+                    width={64}
+                    height={64}
+                    alt="Islander 1"
+                    className="object-cover"
+                  />
+                </div>
+                <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-white" />
               </div>
-              <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-green-500 rounded-full border-2 border-white" />
+              <div className="flex flex-col items-center gap-1">
+                <p className="font-display text-sm text-white drop-shadow-md">
+                  Sarah
+                </p>
+                <div className="bg-black/40 backdrop-blur-sm px-3 py-1 rounded-full border border-white/20">
+                  <motion.p
+                    key={sp1}
+                    initial={{ scale: 1 }}
+                    animate={
+                      winner === "islander1" ? { scale: [1, 1.2, 1] } : {}
+                    }
+                    className="font-display text-xs text-white/90"
+                  >
+                    <span className="text-pink-300">SP:</span>{" "}
+                    <span
+                      className={cn(
+                        winner === "islander1"
+                          ? "text-green-400"
+                          : winner === "islander2"
+                          ? "text-red-400"
+                          : "text-white"
+                      )}
+                    >
+                      {sp1}
+                    </span>
+                  </motion.p>
+                </div>
+              </div>
             </div>
-          </motion.div>
 
-          {/* Islander 2 Avatar */}
-          <motion.div
-            initial={{ scale: 0, x: 50 }}
-            animate={{ scale: 1, x: 0 }}
-            transition={{ type: "spring", duration: 0.8 }}
-            className="absolute right-4 bottom-4"
-          >
-            <div className="relative">
-              <div className="w-20 h-20 rounded-full overflow-hidden border-4 border-white/50 shadow-lg">
-                <Image
-                  src="/placeholder.svg?height=80&width=80"
-                  width={80}
-                  height={80}
-                  alt="Islander 2"
-                  className="object-cover"
-                />
+            {/* VS Badge */}
+            <div className="flex flex-col items-center">
+              <div className="relative">
+                <div className="bg-gradient-to-br from-pink-500 to-purple-500 rounded-full p-4 shadow-lg border-2 border-white/20">
+                  <span className="font-title text-2xl text-white drop-shadow-glow">
+                    VS
+                  </span>
+                </div>
+                <div className="absolute inset-0 rounded-full bg-white/20 animate-pulse" />
               </div>
-              <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-green-500 rounded-full border-2 border-white" />
             </div>
-          </motion.div>
+
+            {/* Islander 2 Avatar */}
+            <div className="flex flex-col items-center gap-2">
+              <div className="relative">
+                <div className="w-16 h-16 rounded-full overflow-hidden border-4 border-white/50 shadow-lg">
+                  <Image
+                    src="/placeholder.svg?height=64&width=64"
+                    width={64}
+                    height={64}
+                    alt="Islander 2"
+                    className="object-cover"
+                  />
+                </div>
+                <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-white" />
+              </div>
+              <div className="flex flex-col items-center gap-1">
+                <p className="font-display text-sm text-white drop-shadow-md">
+                  Mike
+                </p>
+                <div className="bg-black/40 backdrop-blur-sm px-3 py-1 rounded-full border border-white/20">
+                  <motion.p
+                    key={sp2}
+                    initial={{ scale: 1 }}
+                    animate={
+                      winner === "islander2" ? { scale: [1, 1.2, 1] } : {}
+                    }
+                    className="font-display text-xs text-white/90"
+                  >
+                    <span className="text-pink-300">SP:</span>{" "}
+                    <span
+                      className={cn(
+                        winner === "islander2"
+                          ? "text-green-400"
+                          : winner === "islander1"
+                          ? "text-red-400"
+                          : "text-white"
+                      )}
+                    >
+                      {sp2}
+                    </span>
+                  </motion.p>
+                </div>
+              </div>
+            </div>
+          </div>
 
           {/* Chat Container with Compact Vibe Meter */}
           <div className="bg-white/10 backdrop-blur-md rounded-xl border border-white/20 shadow-xl overflow-hidden">
@@ -271,7 +404,112 @@ export default function LoveShackPage() {
                   </div>
                 ))}
               </div>
+              <div className="ml-4 font-display text-sm">
+                <span
+                  className={cn(
+                    "text-white/70",
+                    timeLeft <= 10 && "text-red-400 animate-pulse"
+                  )}
+                >
+                  {timeLeft}s
+                </span>
+              </div>
             </div>
+
+            {winner && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="absolute inset-0 z-30 flex items-center justify-center bg-black/40 backdrop-blur-sm rounded-xl"
+              >
+                <motion.div
+                  initial={{ scale: 0.8 }}
+                  animate={{ scale: 1 }}
+                  className="flex items-center gap-8"
+                >
+                  {/* Islander 1 Result */}
+                  <div className="text-center">
+                    <div className="relative mb-2">
+                      <div
+                        className={cn(
+                          "w-20 h-20 rounded-full overflow-hidden border-4 shadow-lg",
+                          winner === "islander1"
+                            ? "border-green-400"
+                            : "border-red-400"
+                        )}
+                      >
+                        <Image
+                          src="/placeholder.svg?height=80&width=80"
+                          width={80}
+                          height={80}
+                          alt="Islander 1"
+                          className="object-cover"
+                        />
+                      </div>
+                      <motion.div
+                        initial={{ scale: 0, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        transition={{ delay: 0.5 }}
+                        className={cn(
+                          "absolute -bottom-2 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full text-sm font-display",
+                          winner === "islander1"
+                            ? "bg-green-500 text-white"
+                            : "bg-red-500 text-white"
+                        )}
+                      >
+                        {winner === "islander1" ? "+100" : "-50"}
+                      </motion.div>
+                    </div>
+                    <p className="font-display text-lg text-white">Sarah</p>
+                  </div>
+
+                  {/* VS */}
+                  <div className="flex flex-col items-center gap-2">
+                    <div className="font-title text-xl text-white">
+                      Time's Up!
+                    </div>
+                    <div className="font-display text-sm text-white/80">VS</div>
+                  </div>
+
+                  {/* Islander 2 Result */}
+                  <div className="text-center">
+                    <div className="relative mb-2">
+                      <div
+                        className={cn(
+                          "w-20 h-20 rounded-full overflow-hidden border-4 shadow-lg",
+                          winner === "islander2"
+                            ? "border-green-400"
+                            : "border-red-400"
+                        )}
+                      >
+                        <Image
+                          src="/placeholder.svg?height=80&width=80"
+                          width={80}
+                          height={80}
+                          alt="Islander 2"
+                          className="object-cover"
+                        />
+                      </div>
+                      <motion.div
+                        initial={{ scale: 0, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        transition={{ delay: 0.5 }}
+                        className={cn(
+                          "absolute -bottom-2 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full text-sm font-display",
+                          winner === "islander2"
+                            ? "bg-green-500 text-white"
+                            : "bg-red-500 text-white"
+                        )}
+                      >
+                        {winner === "islander2" ? "+100" : "-50"}
+                      </motion.div>
+                    </div>
+                    <p className="font-display text-lg text-white">Mike</p>
+                  </div>
+                </motion.div>
+              </motion.div>
+            )}
 
             {/* Messages */}
             <div className="h-[400px] p-4 overflow-y-auto space-y-4 scroll-smooth">
@@ -298,19 +536,26 @@ export default function LoveShackPage() {
                               VIBES[currentVibe].gradient,
                               "shadow-lg"
                             )
-                          : "bg-white/90 text-gray-800 rounded-bl-none"
+                          : cn(
+                              "bg-white/90 rounded-bl-none",
+                              "border-2",
+                              "border-transparent",
+                              "bg-gradient-to-br from-white/90 to-white/95"
+                            )
                       )}
                     >
-                      <p className="text-sm">{message.text}</p>
                       <p
                         className={cn(
-                          "text-xs mt-1",
+                          "text-sm",
                           message.sender === "islander2"
-                            ? "text-white/70"
-                            : "text-gray-500"
+                            ? "text-white"
+                            : cn(
+                                "bg-gradient-to-br bg-clip-text text-transparent",
+                                VIBES[currentVibe].gradient
+                              )
                         )}
                       >
-                        {message.timestamp}
+                        {message.text}
                       </p>
                     </div>
                   </motion.div>
@@ -327,7 +572,7 @@ export default function LoveShackPage() {
                     isTyping === "islander2" ? "justify-end" : "justify-start"
                   )}
                 >
-                  <div className="bg-white/10 backdrop-blur-sm rounded-full px-3 py-3.5 flex items-center gap-2">
+                  <div className="bg-white/10 backdrop-blur-sm rounded-full px-3 py-2 flex items-center gap-2">
                     <div className="flex gap-1">
                       <span className="w-2 h-2 bg-white/50 rounded-full animate-bounce" />
                       <span
@@ -339,6 +584,9 @@ export default function LoveShackPage() {
                         style={{ animationDelay: "0.4s" }}
                       />
                     </div>
+                    <span className="text-xs font-display text-white/70">
+                      typing...
+                    </span>
                   </div>
                 </motion.div>
               )}
