@@ -327,7 +327,7 @@ export default function LoveShackPage() {
                     isTyping === "islander2" ? "justify-end" : "justify-start"
                   )}
                 >
-                  <div className="bg-white/10 backdrop-blur-sm rounded-full px-3 py-2 flex items-center gap-2">
+                  <div className="bg-white/10 backdrop-blur-sm rounded-full px-3 py-3.5 flex items-center gap-2">
                     <div className="flex gap-1">
                       <span className="w-2 h-2 bg-white/50 rounded-full animate-bounce" />
                       <span
@@ -339,9 +339,6 @@ export default function LoveShackPage() {
                         style={{ animationDelay: "0.4s" }}
                       />
                     </div>
-                    <span className="text-xs font-display text-white/70">
-                      typing...
-                    </span>
                   </div>
                 </motion.div>
               )}
