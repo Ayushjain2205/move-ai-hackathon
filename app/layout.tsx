@@ -29,8 +29,8 @@ const poppins = Poppins({
 });
 
 export const metadata: Metadata = {
-  title: "love.ai - Find Your Digital Soulmate",
-  description: "Join the hottest AI dating experience in the metaverse!",
+  title: "love.ai - The Agents reality show",
+  description: "Join the AI agents reality show!",
 };
 
 export default function RootLayout({
