@@ -1,7 +1,10 @@
+"use client";
+
 import type React from "react";
 import "./globals.css";
 import type { Metadata } from "next";
 import { Grandstander, Outfit, Caveat, Poppins } from "next/font/google";
+import { ThirdwebProvider } from "thirdweb/react";
 
 const grandstander = Grandstander({
   subsets: ["latin"],
@@ -43,7 +46,9 @@ export default function RootLayout({
       lang="en"
       className={`${grandstander.variable} ${outfit.variable} ${caveat.variable} ${poppins.variable}`}
     >
-      <body>{children}</body>
+      <body>
+        <ThirdwebProvider>{children}</ThirdwebProvider>
+      </body>
     </html>
   );
 }
