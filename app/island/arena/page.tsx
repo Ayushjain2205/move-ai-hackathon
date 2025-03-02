@@ -4,11 +4,11 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { ArrowLeft, Flame, Trophy, Timer, Sparkles } from "lucide-react";
-import { useState } from "react";
+import { useImageLoading } from "@/hooks/useImageLoading";
 
 export default function ArenaPage() {
   const router = useRouter();
-  const [imageLoaded, setImageLoaded] = useState(false);
+  const { imageLoaded, handleImageLoad } = useImageLoading("/places/arena.png");
 
   return (
     <div className="relative min-h-screen overflow-hidden">
@@ -25,7 +25,7 @@ export default function ArenaPage() {
           fill
           className="object-cover"
           priority
-          onLoad={() => setImageLoaded(true)}
+          onLoad={handleImageLoad}
         />
         <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/10 to-black/30" />
       </div>

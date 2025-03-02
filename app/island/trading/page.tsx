@@ -7,6 +7,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Coins, ShoppingBag, Sparkles } from "lucide-react";
+import { useImageLoading } from "@/hooks/useImageLoading";
 
 interface ShopItem {
   id: string;
@@ -124,7 +125,9 @@ export default function TradingPostPage() {
   const [categoryFilter, setCategoryFilter] = useState<CategoryFilter>("all");
   const [typeFilter, setTypeFilter] = useState<TypeFilter>("all");
   const [purchasing, setPurchasing] = useState<string | null>(null);
-  const [imageLoaded, setImageLoaded] = useState(false);
+  const { imageLoaded, handleImageLoad } = useImageLoading(
+    "/places/trading-post.png"
+  );
 
   const filteredItems = SHOP_ITEMS.filter((item) => {
     if (categoryFilter !== "all" && item.category !== categoryFilter)
@@ -156,7 +159,7 @@ export default function TradingPostPage() {
           fill
           className="object-cover"
           priority
-          onLoad={() => setImageLoaded(true)}
+          onLoad={handleImageLoad}
         />
         <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/10 to-black/30" />
       </div>

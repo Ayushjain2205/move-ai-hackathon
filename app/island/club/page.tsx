@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { useImageLoading } from "@/hooks/useImageLoading";
 import {
   Select,
   SelectContent,
@@ -182,7 +183,7 @@ export default function SunsetClubPage() {
   const [typeFilter, setTypeFilter] = useState<TypeFilter>("all");
   const [genderFilter, setGenderFilter] = useState<GenderFilter>("all");
   const [nudging, setNudging] = useState<string | null>(null);
-  const [imageLoaded, setImageLoaded] = useState(false);
+  const { imageLoaded, handleImageLoad } = useImageLoading("/places/club.png");
 
   const filteredProfiles = ISLANDER_PROFILES.filter((profile) => {
     if (statusFilter !== "all" && profile.status !== statusFilter) return false;
@@ -219,7 +220,7 @@ export default function SunsetClubPage() {
           fill
           className="object-cover"
           priority
-          onLoad={() => setImageLoaded(true)}
+          onLoad={handleImageLoad}
         />
         <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/10 to-black/30" />
       </div>

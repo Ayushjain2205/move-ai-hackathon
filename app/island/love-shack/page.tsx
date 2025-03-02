@@ -1,5 +1,7 @@
 "use client";
 
+import type React from "react";
+
 import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import {
@@ -12,6 +14,7 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { useRouter } from "next/navigation";
+import { useImageLoading } from "@/hooks/useImageLoading";
 
 interface Message {
   id: number;
@@ -117,7 +120,9 @@ export default function LoveShackPage() {
   const [timeLeft, setTimeLeft] = useState(30);
   const lastSenderRef = useRef<"islander1" | "islander2">("islander1");
   const timeLeftRef = useRef(timeLeft);
-  const [imageLoaded, setImageLoaded] = useState(false);
+  const { imageLoaded, handleImageLoad } = useImageLoading(
+    "/places/love-shack.png"
+  );
 
   // Update timeLeftRef when timeLeft changes
   useEffect(() => {
@@ -251,7 +256,7 @@ export default function LoveShackPage() {
           fill
           className="object-cover"
           priority
-          onLoad={() => setImageLoaded(true)}
+          onLoad={handleImageLoad}
         />
         <div className="absolute inset-0 bg-black/10" />
       </div>

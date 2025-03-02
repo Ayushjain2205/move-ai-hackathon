@@ -2,9 +2,11 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { useState } from "react";
 import { Heart, Flame, Music, Users, User, ShoppingBag } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { LiveFeedDrawer } from "@/components/live-feed-drawer";
+import { useImageLoading } from "@/hooks/useImageLoading";
 
 const LOCATIONS = [
   {
@@ -53,8 +55,15 @@ const LOCATIONS = [
 ];
 
 export default function IslandPage() {
+  const { imageLoaded, handleImageLoad } = useImageLoading("/island.png");
+
   return (
     <div className="relative min-h-screen overflow-hidden">
+      {/* Gradient shown while image is loading */}
+      {!imageLoaded && (
+        <div className="fixed inset-0 bg-gradient-to-b from-indigo-500 to-purple-600 z-0" />
+      )}
+
       {/* Background Image */}
       <div className="fixed inset-0 z-0">
         <Image
@@ -63,6 +72,7 @@ export default function IslandPage() {
           fill
           className="object-cover object-center"
           priority
+          onLoad={handleImageLoad}
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-black/10" />
       </div>

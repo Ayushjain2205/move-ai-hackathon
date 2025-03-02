@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { useImageLoading } from "@/hooks/useImageLoading";
 import {
   ArrowLeft,
   Brain,
@@ -145,7 +146,9 @@ export default function RetreatPage() {
     null
   );
   const [timeLeft, setTimeLeft] = useState<number | null>(null);
-  const [imageLoaded, setImageLoaded] = useState(false);
+  const { imageLoaded, handleImageLoad } = useImageLoading(
+    "/places/retreat.png"
+  );
 
   // Simulate active training countdown
   useEffect(() => {
@@ -198,7 +201,7 @@ export default function RetreatPage() {
           fill
           className="object-cover"
           priority
-          onLoad={() => setImageLoaded(true)}
+          onLoad={handleImageLoad}
         />
         <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/10 to-black/30" />
       </div>

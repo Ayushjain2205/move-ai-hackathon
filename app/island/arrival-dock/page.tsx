@@ -17,6 +17,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { ArrowLeft, Heart, Sparkles, Wand2 } from "lucide-react";
+import { useImageLoading } from "@/hooks/useImageLoading";
 
 interface IslanderFormData {
   name: string;
@@ -95,6 +96,10 @@ export default function ArrivalDockPage() {
     "idle" | "creating" | "success"
   >("idle");
 
+  const { imageLoaded, handleImageLoad } = useImageLoading(
+    "/places/arrival-dock.png"
+  );
+
   const updateFormData = (field: string, value: any) => {
     setFormData((prev) => {
       const newData = { ...prev };
@@ -146,6 +151,11 @@ export default function ArrivalDockPage() {
 
   return (
     <div className="relative min-h-screen overflow-hidden">
+      {/* Gradient shown while image is loading */}
+      {!imageLoaded && (
+        <div className="fixed inset-0 bg-gradient-to-b from-indigo-500 to-purple-600 z-0" />
+      )}
+
       {/* Background Image */}
       <div className="fixed inset-0 z-0">
         <Image
@@ -154,6 +164,7 @@ export default function ArrivalDockPage() {
           fill
           className="object-cover"
           priority
+          onLoad={handleImageLoad}
         />
         <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/10 to-black/30" />
       </div>
