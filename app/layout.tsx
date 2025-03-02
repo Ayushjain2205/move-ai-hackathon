@@ -5,6 +5,7 @@ import "./globals.css";
 import type { Metadata } from "next";
 import { Grandstander, Outfit, Caveat, Poppins } from "next/font/google";
 import { ThirdwebProvider } from "thirdweb/react";
+import { client } from "@/lib/client";
 
 const grandstander = Grandstander({
   subsets: ["latin"],
