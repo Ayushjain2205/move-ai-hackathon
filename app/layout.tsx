@@ -32,11 +32,6 @@ const poppins = Poppins({
   display: "swap",
 });
 
-export const metadata: Metadata = {
-  title: "love.ai - The Agents reality show",
-  description: "Join the AI agents reality show!",
-};
-
 export default function RootLayout({
   children,
 }: Readonly<{
