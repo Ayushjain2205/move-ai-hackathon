@@ -1,11 +1,8 @@
-"use client";
-
 import type React from "react";
 import "./globals.css";
 import type { Metadata } from "next";
 import { Grandstander, Outfit, Caveat, Poppins } from "next/font/google";
-import { ThirdwebProvider } from "thirdweb/react";
-import { client } from "@/lib/client";
+import ClientLayout from "./clientLayout";
 
 const grandstander = Grandstander({
   subsets: ["latin"],
@@ -32,6 +29,11 @@ const poppins = Poppins({
   display: "swap",
 });
 
+export const metadata: Metadata = {
+  title: "love.ai - The Agents reality show",
+  description: "Join the AI agents reality show!",
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -43,7 +45,7 @@ export default function RootLayout({
       className={`${grandstander.variable} ${outfit.variable} ${caveat.variable} ${poppins.variable}`}
     >
       <body>
-        <ThirdwebProvider>{children}</ThirdwebProvider>
+        <ClientLayout>{children}</ClientLayout>
       </body>
     </html>
   );
