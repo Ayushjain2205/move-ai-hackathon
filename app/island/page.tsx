@@ -7,7 +7,8 @@ import { Heart, Flame, Music, Users, User, ShoppingBag } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { LiveFeedDrawer } from "@/components/live-feed-drawer";
 import { useImageLoading } from "@/hooks/useImageLoading";
-
+import { ConnectButton } from "thirdweb/react";
+import { client } from "@/lib/client";
 const LOCATIONS = [
   {
     name: "Love Shack",
@@ -90,6 +91,9 @@ export default function IslandPage() {
           <p className="font-handwritten text-xl text-white/90 mt-2">
             explore the island
           </p>
+          <div className="absolute top-4 right-4">
+            <ConnectButton client={client} />
+          </div>
         </header>
 
         {/* Location Grid */}

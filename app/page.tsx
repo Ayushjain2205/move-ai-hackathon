@@ -49,7 +49,7 @@ export default function LandingPage() {
 
         <div className="transform hover:-translate-y-1 transition-transform duration-200">
           <button
-            onClick={() => router.push("/island")}
+            onClick={() => router.push("/login")}
             className="group relative"
           >
             {/* Button shadow/border effect */}
