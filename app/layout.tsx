@@ -2,7 +2,7 @@ import type React from "react";
 import "./globals.css";
 import type { Metadata } from "next";
 import { Grandstander, Outfit, Caveat, Poppins } from "next/font/google";
-import ClientLayout from "./clientLayout";
+import ClientLayout from "./ClientLayout";
 
 const grandstander = Grandstander({
   subsets: ["latin"],
