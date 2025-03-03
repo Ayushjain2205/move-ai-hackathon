@@ -7,7 +7,8 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { ConnectEmbed } from "thirdweb/react";
 import { client } from "@/lib/client";
-import { createWallet } from "thirdweb/wallets";
+import { defineChain } from "thirdweb";
+
 export default function LandingPage() {
   const router = useRouter();
   const [imageLoaded, setImageLoaded] = useState(false);
@@ -16,6 +17,16 @@ export default function LandingPage() {
     console.log("Wallet connected:", wallet);
     router.push("/island");
   };
+
+  const chain = defineChain({
+    id: 1313161641,
+    rpc: "https://0x4e4541a9.rpc.aurora-cloud.dev",
+    nativeCurrency: {
+      name: "Love.ai",
+      symbol: "AURORA",
+      decimals: 18,
+    },
+  });
 
   return (
     <div className="relative min-h-screen overflow-hidden">
@@ -60,6 +71,7 @@ export default function LandingPage() {
               showAllWallets={true}
               autoConnect={false}
               theme="light"
+              chains={[chain]}
             />
           </div>
         </div>

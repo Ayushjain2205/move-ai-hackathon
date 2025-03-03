@@ -9,6 +9,8 @@ import { LiveFeedDrawer } from "@/components/live-feed-drawer";
 import { useImageLoading } from "@/hooks/useImageLoading";
 import { ConnectButton } from "thirdweb/react";
 import { client } from "@/lib/client";
+import { defineChain } from "thirdweb";
+
 const LOCATIONS = [
   {
     name: "Love Shack",
@@ -58,6 +60,16 @@ const LOCATIONS = [
 export default function IslandPage() {
   const { imageLoaded, handleImageLoad } = useImageLoading("/island.png");
 
+  const chain = defineChain({
+    id: 1313161641,
+    rpc: "https://0x4e4541a9.rpc.aurora-cloud.dev",
+    nativeCurrency: {
+      name: "Love.ai",
+      symbol: "AURORA",
+      decimals: 18,
+    },
+  });
+
   return (
     <div className="relative min-h-screen overflow-hidden">
       {/* Gradient shown while image is loading */}
@@ -92,7 +104,7 @@ export default function IslandPage() {
             explore the island
           </p>
           <div className="absolute top-4 right-4">
-            <ConnectButton client={client} />
+            <ConnectButton client={client} chains={[chain]} />
           </div>
         </header>
 
