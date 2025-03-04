@@ -15,15 +15,107 @@ interface ShopItem {
   description: string;
   price: number;
   image: string;
-  category: "him" | "her" | "both";
-  type: "clothing" | "accessory" | "emote" | "background";
+  category: "him" | "her" | "both" | "gift";
+  type: "clothing" | "accessory" | "emote" | "background" | "gift";
 }
 
 const SHOP_ITEMS: ShopItem[] = [
+  // Gifts
+  {
+    id: "friendship-bracelet",
+    name: "Friendship Bracelet",
+    description: "Glows with daily affirmations, changes color with mood",
+    price: 100,
+    image: "/gifts/bracelet.png",
+    category: "gift",
+    type: "gift",
+  },
+  {
+    id: "crown-of-excellence",
+    name: "Crown of Excellence",
+    description: "Virtual flowers grow with achievements",
+    price: 200,
+    image: "/gifts/crown.png",
+    category: "gift",
+    type: "gift",
+  },
+  {
+    id: "dream-catcher",
+    name: "Dream Catcher",
+    description: "Displays weekly goals achieved",
+    price: 300,
+    image: "/gifts/dreamcatcher.png",
+    category: "gift",
+    type: "gift",
+  },
+  {
+    id: "hat-of-empathy",
+    name: "Hat of Empathy",
+    description: "Interacts with Maya, provides encouragement",
+    price: 400,
+    image: "/gifts/hat.png",
+    category: "gift",
+    type: "gift",
+  },
+  {
+    id: "hoodie",
+    name: "Hoodie",
+    description: "Stores achievements, creates visual timeline",
+    price: 500,
+    image: "/gifts/hoodie.png",
+    category: "gift",
+    type: "gift",
+  },
+  {
+    id: "locket-of-love",
+    name: "Locket of Love",
+    description: "Shows affirmations, creates fun selfie filters",
+    price: 600,
+    image: "/gifts/locket.png",
+    category: "gift",
+    type: "gift",
+  },
+  {
+    id: "enchanted-mirror",
+    name: "Enchanted Mirror",
+    description: "Customizable, changes with accomplishments",
+    price: 700,
+    image: "/gifts/mirror.png",
+    category: "gift",
+    type: "gift",
+  },
+  {
+    id: "makeup-box",
+    name: "Makeup Box",
+    description: "Personal star map growing with achievements",
+    price: 800,
+    image: "/gifts/makeupbox.png",
+    category: "gift",
+    type: "gift",
+  },
+  {
+    id: "ring-of-friendship",
+    name: "Ring of Friendship",
+    description: "Stores memories, creates surprise celebrations",
+    price: 900,
+    image: "/gifts/ring.png",
+    category: "gift",
+    type: "gift",
+  },
+  {
+    id: "sunglasses",
+    name: "Sunglasses",
+    description: "Customizable, changes with accomplishments",
+    price: 1000,
+    image: "/gifts/sunglasses.png",
+    category: "gift",
+    type: "gift",
+  },
+
   // For Him
   {
     id: "swim-trunks",
-    name: "Beach Ready Swim Trunks",
+    name: "Bracelet",
     description: "Perfect for those sunset beach walks",
     price: 500,
     image: "/placeholder.svg?height=400&width=400",
@@ -117,8 +209,14 @@ const SHOP_ITEMS: ShopItem[] = [
   },
 ];
 
-type CategoryFilter = "all" | "him" | "her" | "both";
-type TypeFilter = "all" | "clothing" | "accessory" | "emote" | "background";
+type CategoryFilter = "all" | "him" | "her" | "both" | "gift";
+type TypeFilter =
+  | "all"
+  | "clothing"
+  | "accessory"
+  | "emote"
+  | "background"
+  | "gift";
 
 export default function TradingPostPage() {
   const router = useRouter();
@@ -194,23 +292,29 @@ export default function TradingPostPage() {
               <div className="space-y-3">
                 {/* Category Filters */}
                 <div className="flex flex-wrap gap-2">
-                  {(["all", "him", "her", "both"] as const).map((category) => (
-                    <button
-                      key={category}
-                      onClick={() => setCategoryFilter(category)}
-                      className={cn(
-                        "px-3 py-1.5 rounded-lg border-2 transition-all duration-200",
-                        "font-display text-xs",
-                        categoryFilter === category
-                          ? "bg-gradient-to-r from-pink-500/20 to-purple-500/20 border-white"
-                          : "bg-white/5 border-white/20 hover:bg-white/10"
-                      )}
-                    >
-                      <span className="text-white capitalize">
-                        {category === "all" ? "All Items" : `For ${category}`}
-                      </span>
-                    </button>
-                  ))}
+                  {(["all", "gift", "him", "her", "both"] as const).map(
+                    (category) => (
+                      <button
+                        key={category}
+                        onClick={() => setCategoryFilter(category)}
+                        className={cn(
+                          "px-3 py-1.5 rounded-lg border-2 transition-all duration-200",
+                          "font-display text-xs",
+                          categoryFilter === category
+                            ? "bg-gradient-to-r from-pink-500/20 to-purple-500/20 border-white"
+                            : "bg-white/5 border-white/20 hover:bg-white/10"
+                        )}
+                      >
+                        <span className="text-white capitalize">
+                          {category === "all"
+                            ? "All Items"
+                            : category === "gift"
+                            ? "Gifts"
+                            : `For ${category}`}
+                        </span>
+                      </button>
+                    )
+                  )}
                 </div>
 
                 {/* Type Filters */}
@@ -218,6 +322,7 @@ export default function TradingPostPage() {
                   {(
                     [
                       "all",
+                      "gift",
                       "clothing",
                       "accessory",
                       "emote",

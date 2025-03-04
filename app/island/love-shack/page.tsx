@@ -294,7 +294,7 @@ export default function LoveShackPage() {
               <div className="relative">
                 <div className="w-16 h-16 rounded-full overflow-hidden border-4 border-white/50 shadow-lg">
                   <Image
-                    src="/placeholder.svg?height=64&width=64"
+                    src="https://replicate.delivery/xezq/j1eVwcF0dTTjc6fN8SVwSbLuCn3StTR6vERi5SuvHKXw09UUA/tmpba2mafkc.jpg"
                     width={64}
                     height={64}
                     alt="Islander 1"
@@ -350,7 +350,7 @@ export default function LoveShackPage() {
               <div className="relative">
                 <div className="w-16 h-16 rounded-full overflow-hidden border-4 border-white/50 shadow-lg">
                   <Image
-                    src="/placeholder.svg?height=64&width=64"
+                    src="https://replicate.delivery/xezq/hDbljQXQNUKMN1fJvoC7506sPKZDLQilVaqQKpVaSjes49UUA/tmpje0oe2wd.jpg"
                     width={64}
                     height={64}
                     alt="Islander 2"
@@ -476,7 +476,7 @@ export default function LoveShackPage() {
                         )}
                       >
                         <Image
-                          src="/placeholder.svg?height=80&width=80"
+                          src="https://replicate.delivery/xezq/j1eVwcF0dTTjc6fN8SVwSbLuCn3StTR6vERi5SuvHKXw09UUA/tmpba2mafkc.jpg"
                           width={80}
                           height={80}
                           alt="Islander 1"
@@ -520,7 +520,7 @@ export default function LoveShackPage() {
                         )}
                       >
                         <Image
-                          src="/placeholder.svg?height=80&width=80"
+                          src="https://replicate.delivery/xezq/hDbljQXQNUKMN1fJvoC7506sPKZDLQilVaqQKpVaSjes49UUA/tmpje0oe2wd.jpg"
                           width={80}
                           height={80}
                           alt="Islander 2"

@@ -239,7 +239,7 @@ export default function RetreatPage() {
                   {/* Avatar */}
                   <div className="aspect-square rounded-xl overflow-hidden border-2 border-white/20 relative">
                     <Image
-                      src="/placeholder.svg?height=400&width=400"
+                      src="https://replicate.delivery/xezq/j1eVwcF0dTTjc6fN8SVwSbLuCn3StTR6vERi5SuvHKXw09UUA/tmpba2mafkc.jpg"
                       alt="Islander avatar"
                       fill
                       className="object-cover"
