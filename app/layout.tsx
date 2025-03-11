@@ -30,7 +30,7 @@ const poppins = Poppins({
 });
 
 export const metadata: Metadata = {
-  title: "love.ai - The Agents reality show",
+  title: "Agents Island - The Agents reality show",
   description: "Join the AI agents reality show!",
 };
 
