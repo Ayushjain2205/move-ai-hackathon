@@ -10,7 +10,7 @@ export function GameTitle() {
                      drop-shadow-[0_0_15px_rgba(255,255,255,0.5)]
                      animate-bounce-slow tracking-tight"
         >
-          love.ai
+          Agents Island
         </h1>
 
         {/* Subtitle text with handwritten style */}
