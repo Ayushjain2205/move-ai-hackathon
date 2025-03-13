@@ -7,11 +7,12 @@ import { Heart, Flame, Music, Users, User, ShoppingBag } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { LiveFeedDrawer } from "@/components/live-feed-drawer";
 import { useImageLoading } from "@/hooks/useImageLoading";
-
+import { WalletSelector } from "@/components/wallet/WalletSelector";
 const LOCATIONS = [
   {
     name: "Love Shack",
-    description: "💖 Social Hub - Connect with other islanders and build relationships",
+    description:
+      "💖 Social Hub - Connect with other islanders and build relationships",
     icon: Heart,
     href: "/island/love-shack",
     color: "from-pink-400 to-red-400",
@@ -59,7 +60,9 @@ export default function IslandPage() {
   return (
     <div className="relative min-h-screen overflow-hidden">
       {/* Gradient shown while image is loading */}
-      {!imageLoaded && <div className="fixed inset-0 bg-gradient-to-b from-indigo-500 to-purple-600 z-0" />}
+      {!imageLoaded && (
+        <div className="fixed inset-0 bg-gradient-to-b from-indigo-500 to-purple-600 z-0" />
+      )}
 
       {/* Background Image */}
       <div className="fixed inset-0 z-0">
@@ -81,16 +84,26 @@ export default function IslandPage() {
       <div className="relative z-10 min-h-screen">
         {/* Header */}
         <header className="pt-8 px-6 text-center">
-          <h1 className="font-title text-4xl text-white drop-shadow-glow">Welcome to Paradise</h1>
-          <p className="font-handwritten text-xl text-white/90 mt-2">explore the island</p>
-          <div className="absolute top-4 right-4"></div>
+          <h1 className="font-title text-4xl text-white drop-shadow-glow">
+            Welcome to Paradise
+          </h1>
+          <p className="font-handwritten text-xl text-white/90 mt-2">
+            explore the island
+          </p>
+          <div className="absolute top-4 right-4">
+            <WalletSelector />
+          </div>
         </header>
 
         {/* Location Grid */}
         <div className="max-w-5xl mx-auto px-6 py-12">
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-8">
             {LOCATIONS.map((location) => (
-              <Link key={location.name} href={location.href} className="group relative flex flex-col items-center">
+              <Link
+                key={location.name}
+                href={location.href}
+                className="group relative flex flex-col items-center"
+              >
                 {/* Location Icon */}
                 <div
                   className={cn(
@@ -98,12 +111,16 @@ export default function IslandPage() {
                     "transform transition-all duration-300 ease-out",
                     "group-hover:scale-105 group-hover:-translate-y-1",
                     "group-hover:shadow-[0_0_20px_rgba(255,255,255,0.3)]",
-                    "border-2 border-white/20",
+                    "border-2 border-white/20"
                   )}
                 >
                   {/* Icon Background */}
                   <div
-                    className={cn("absolute inset-0 bg-gradient-to-br", location.color, "opacity-90 backdrop-blur-sm")}
+                    className={cn(
+                      "absolute inset-0 bg-gradient-to-br",
+                      location.color,
+                      "opacity-90 backdrop-blur-sm"
+                    )}
                   />
 
                   {/* Icon */}
@@ -143,7 +160,9 @@ export default function IslandPage() {
                     className="w-48 bg-white/90 backdrop-blur-sm rounded-lg p-2.5
                                 shadow-lg"
                   >
-                    <p className="text-sm text-gray-700 font-body text-center">{location.description}</p>
+                    <p className="text-sm text-gray-700 font-body text-center">
+                      {location.description}
+                    </p>
                   </div>
                   {/* Tooltip Arrow */}
                   <div

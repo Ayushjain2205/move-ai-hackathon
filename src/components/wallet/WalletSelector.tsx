@@ -1,7 +1,17 @@
 // Internal components
 import { Button } from "@/components/ui/button";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -23,7 +33,16 @@ import {
   truncateAddress,
   useWallet,
 } from "@aptos-labs/wallet-adapter-react";
-import { ArrowLeft, ArrowRight, ChevronDown, Copy, LogOut, User } from "lucide-react";
+import {
+  ArrowLeft,
+  ArrowRight,
+  ChevronDown,
+  Copy,
+  LogOut,
+  User,
+  Wallet,
+} from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useCallback, useState } from "react";
 
 interface WalletSelectorProps {
@@ -31,12 +50,20 @@ interface WalletSelectorProps {
   buttonText?: string;
 }
 
-export function WalletSelector({ className, buttonText = "Connect a Wallet" }: WalletSelectorProps = {}) {
+export function WalletSelector({
+  className,
+  buttonText = "Connect a Wallet",
+}: WalletSelectorProps = {}) {
   const { account, connected, disconnect, wallet } = useWallet();
   const { toast } = useToast();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const router = useRouter();
 
   const closeDialog = useCallback(() => setIsDialogOpen(false), []);
+
+  const gotoWallet = useCallback(() => {
+    router.push("/wallet");
+  }, []);
 
   const copyAddress = useCallback(async () => {
     if (!account?.address.toStringLong()) return;
@@ -115,7 +142,9 @@ export function WalletSelector({ className, buttonText = "Connect a Wallet" }: W
         <div className="transform hover:-translate-y-1 transition-transform duration-200">
           <StyledButton>
             <span className={className}>
-              {account?.ansName || truncateAddress(account?.address.toStringLong()) || "Unknown"}
+              {account?.ansName ||
+                truncateAddress(account?.address.toStringLong()) ||
+                "Unknown"}
             </span>
           </StyledButton>
         </div>
@@ -130,13 +159,21 @@ export function WalletSelector({ className, buttonText = "Connect a Wallet" }: W
         </StyledMenuItem>
         {wallet && isAptosConnectWallet(wallet) && (
           <StyledMenuItem icon={User}>
-            <a href={APTOS_CONNECT_ACCOUNT_URL} target="_blank" rel="noopener noreferrer" className="flex gap-2 w-full">
+            <a
+              href={APTOS_CONNECT_ACCOUNT_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex gap-2 w-full"
+            >
               Account
             </a>
           </StyledMenuItem>
         )}
         <StyledMenuItem icon={LogOut} onClick={disconnect}>
           Disconnect
+        </StyledMenuItem>
+        <StyledMenuItem icon={Wallet} onClick={gotoWallet}>
+          Wallet
         </StyledMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
@@ -160,7 +197,8 @@ interface ConnectWalletDialogProps {
 
 function ConnectWalletDialog({ close }: ConnectWalletDialogProps) {
   const { wallets = [] } = useWallet();
-  const { aptosConnectWallets, availableWallets, installableWallets } = groupAndSortWallets(wallets);
+  const { aptosConnectWallets, availableWallets, installableWallets } =
+    groupAndSortWallets(wallets);
 
   const hasAptosConnectWallets = !!aptosConnectWallets.length;
 
@@ -183,7 +221,11 @@ function ConnectWalletDialog({ close }: ConnectWalletDialogProps) {
         {hasAptosConnectWallets && (
           <div className="flex flex-col gap-2 pt-3">
             {aptosConnectWallets.map((wallet) => (
-              <AptosConnectWalletRow key={wallet.name} wallet={wallet} onConnect={close} />
+              <AptosConnectWalletRow
+                key={wallet.name}
+                wallet={wallet}
+                onConnect={close}
+              />
             ))}
             <p className="flex gap-1 justify-center items-center text-muted-foreground text-sm">
               Learn more about{" "}
@@ -220,7 +262,11 @@ function ConnectWalletDialog({ close }: ConnectWalletDialogProps) {
               </CollapsibleTrigger>
               <CollapsibleContent className="flex flex-col gap-3">
                 {installableWallets.map((wallet) => (
-                  <WalletRow key={wallet.name} wallet={wallet} onConnect={close} />
+                  <WalletRow
+                    key={wallet.name}
+                    wallet={wallet}
+                    onConnect={close}
+                  />
                 ))}
               </CollapsibleContent>
             </Collapsible>
@@ -280,7 +326,9 @@ function renderEducationScreen(screen: AboutAptosConnectEducationScreen) {
         <Button variant="ghost" size="icon" onClick={screen.cancel}>
           <ArrowLeft />
         </Button>
-        <DialogTitle className="leading-snug text-base text-center">About Aptos Connect</DialogTitle>
+        <DialogTitle className="leading-snug text-base text-center">
+          About Aptos Connect
+        </DialogTitle>
       </DialogHeader>
 
       <div className="flex h-[162px] pb-3 items-end justify-center">
@@ -292,7 +340,12 @@ function renderEducationScreen(screen: AboutAptosConnectEducationScreen) {
       </div>
 
       <div className="grid grid-cols-3 items-center">
-        <Button size="sm" variant="ghost" onClick={screen.back} className="justify-self-start">
+        <Button
+          size="sm"
+          variant="ghost"
+          onClick={screen.back}
+          className="justify-self-start"
+        >
           Back
         </Button>
         <div className="flex items-center gap-2 place-self-center">
@@ -302,7 +355,12 @@ function renderEducationScreen(screen: AboutAptosConnectEducationScreen) {
             </ScreenIndicator>
           ))}
         </div>
-        <Button size="sm" variant="ghost" onClick={screen.next} className="gap-2 justify-self-end">
+        <Button
+          size="sm"
+          variant="ghost"
+          onClick={screen.next}
+          className="gap-2 justify-self-end"
+        >
           {screen.screenIndex === screen.totalScreens - 1 ? "Finish" : "Next"}
           <ArrowRight size={16} />
         </Button>
