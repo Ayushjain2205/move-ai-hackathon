@@ -16,6 +16,7 @@ const LOCATIONS = [
     icon: Heart,
     href: "/island/love-shack",
     color: "from-pink-400 to-red-400",
+    imagePath: "/tiles/love-shack.png",
   },
   {
     name: "Challenge Arena",
@@ -23,6 +24,7 @@ const LOCATIONS = [
     icon: Flame,
     href: "/island/arena",
     color: "from-orange-400 to-red-400",
+    imagePath: "/tiles/arena.png",
   },
   {
     name: "Sunset Club",
@@ -30,6 +32,7 @@ const LOCATIONS = [
     icon: Music,
     href: "/island/club",
     color: "from-purple-400 to-pink-400",
+    imagePath: "/tiles/club.png",
   },
   {
     name: "Arrival Dock",
@@ -37,6 +40,7 @@ const LOCATIONS = [
     icon: Users,
     href: "/island/arrival-dock",
     color: "from-indigo-400 to-purple-400",
+    imagePath: "/tiles/arrival-dock.png",
   },
   {
     name: "The Retreat",
@@ -44,6 +48,7 @@ const LOCATIONS = [
     icon: User,
     href: "/island/retreat",
     color: "from-blue-400 to-indigo-400",
+    imagePath: "/tiles/retreat.png",
   },
   {
     name: "Trading Post",
@@ -51,6 +56,7 @@ const LOCATIONS = [
     icon: ShoppingBag,
     href: "/island/trading",
     color: "from-teal-400 to-blue-400",
+    imagePath: "/tiles/trading.png",
   },
 ];
 
@@ -104,7 +110,7 @@ export default function IslandPage() {
                 href={location.href}
                 className="group relative flex flex-col items-center"
               >
-                {/* Location Icon */}
+                {/* Location Image */}
                 <div
                   className={cn(
                     "relative w-24 h-24 rounded-2xl overflow-hidden",
@@ -114,31 +120,18 @@ export default function IslandPage() {
                     "border-2 border-white/20"
                   )}
                 >
-                  {/* Icon Background */}
-                  <div
-                    className={cn(
-                      "absolute inset-0 bg-gradient-to-br",
-                      location.color,
-                      "opacity-90 backdrop-blur-sm"
-                    )}
+                  <Image
+                    src={location.imagePath}
+                    alt={location.name}
+                    fill
+                    className="object-cover"
                   />
 
-                  {/* Icon */}
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <location.icon
-                      className="w-12 h-12 text-white drop-shadow-glow 
-                                transform transition-transform duration-300 
-                                group-hover:scale-110"
-                    />
-                  </div>
-
-                  {/* Hover Glow Effect */}
+                  {/* Hover Overlay */}
                   <div
                     className="absolute inset-0 opacity-0 group-hover:opacity-100 
-                                transition-opacity duration-300"
-                  >
-                    <div className="absolute inset-0 bg-white/10" />
-                  </div>
+                              transition-opacity duration-300 bg-white/10"
+                  />
                 </div>
 
                 {/* Location Name */}
