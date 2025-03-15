@@ -1,7 +1,5 @@
 "use client";
 
-import type React from "react";
-
 import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import {
@@ -10,11 +8,12 @@ import {
   Flame,
   Coffee,
   Frown,
+  ArrowLeft,
+  MessageCircle,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { useRouter } from "next/navigation";
-import { useImageLoading } from "@/hooks/useImageLoading";
 
 interface Message {
   id: number;
@@ -113,106 +112,89 @@ export default function LoveShackPage() {
   );
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [isActive, setIsActive] = useState(true);
-  const router = useRouter();
+  const timeoutRef = useRef<NodeJS.Timeout>();
+
   const [sp1, setSp1] = useState(2450);
   const [sp2, setSp2] = useState(1890);
   const [winner, setWinner] = useState<"islander1" | "islander2" | null>(null);
   const [timeLeft, setTimeLeft] = useState(30);
-  const lastSenderRef = useRef<"islander1" | "islander2">("islander1");
-  const timeLeftRef = useRef(timeLeft);
-  const { imageLoaded, handleImageLoad } = useImageLoading(
-    "/places/love-shack.png"
-  );
 
-  // Update timeLeftRef when timeLeft changes
-  useEffect(() => {
-    timeLeftRef.current = timeLeft;
-  }, [timeLeft]);
+  const router = useRouter();
 
   // Add initial message
   useEffect(() => {
-    setMessages([
-      {
-        id: Date.now(),
-        sender: "islander1",
-        text: "Hey there! Ready to chat? 💖",
-        timestamp: new Date().toLocaleTimeString(),
-      },
-    ]);
+    const initialMessage: Message = {
+      id: Date.now(),
+      sender: "islander1" as const,
+      text: "Hey there! Ready to chat? 💖",
+      timestamp: new Date().toLocaleTimeString(),
+    };
+    setMessages([initialMessage]);
   }, []);
 
-  // Scroll to bottom when messages change or typing state changes
-  useEffect(() => {
-    if (messagesEndRef.current) {
-      messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
-    }
-  }, [messages, isTyping]);
+  // Function to generate a new message
+  const generateNewMessage = async () => {
+    if (!isActive || timeLeft <= 0) return;
 
-  // Main chat logic
-  useEffect(() => {
-    console.log("Chat effect running, isActive:", isActive);
+    const lastMessage = messages[messages.length - 1];
+    const nextSender =
+      lastMessage.sender === "islander1" ? "islander2" : "islander1";
 
-    if (!isActive) {
-      console.log("Chat effect stopped - inactive");
-      return;
-    }
+    // Show typing indicator
+    setIsTyping(nextSender);
 
-    let isComponentMounted = true;
+    try {
+      // Simulate typing delay
+      await new Promise((resolve) => setTimeout(resolve, 1000));
 
-    const addMessage = () => {
-      if (!isComponentMounted || timeLeftRef.current === 0) return;
-
-      const sender: "islander1" | "islander2" =
-        lastSenderRef.current === "islander1" ? "islander2" : "islander1";
-
-      console.log("Setting typing indicator for:", sender);
-      setIsTyping(sender);
-
-      setTimeout(() => {
-        if (!isComponentMounted || timeLeftRef.current === 0) {
-          setIsTyping(null);
-          return;
-        }
-
-        console.log("Adding new message from:", sender);
-        const newMessage: Message = {
-          id: Date.now(),
-          sender,
-          text: CONVERSATIONS[currentVibe][
-            Math.floor(Math.random() * CONVERSATIONS[currentVibe].length)
-          ],
-          timestamp: new Date().toLocaleTimeString(),
-        };
-
-        setMessages((prev) => [...prev, newMessage]);
+      if (!isActive || timeLeft <= 0) {
         setIsTyping(null);
-        lastSenderRef.current = sender;
+        return;
+      }
 
-        // Maybe change vibe
-        if (Math.random() < 0.2) {
-          const vibes = Object.keys(VIBES) as VibeType[];
-          const newVibe = vibes[Math.floor(Math.random() * vibes.length)];
-          setCurrentVibe(newVibe);
-        }
-      }, 1000);
-    };
+      // Get message from API
+      const response = await fetch("/api/chat-simulation", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          currentVibe,
+          lastMessageSender: lastMessage.sender,
+        }),
+      });
 
-    console.log("Setting up message interval");
-    const interval = setInterval(addMessage, 2500);
+      const data = await response.json();
 
-    // Trigger first message immediately
-    addMessage();
+      // Update messages and vibe
+      setMessages((prev) => [...prev, data.message]);
+      if (data.newVibe !== currentVibe) {
+        setCurrentVibe(data.newVibe);
+      }
+      setIsTyping(null);
+
+      // Schedule next message
+      timeoutRef.current = setTimeout(generateNewMessage, 1500);
+    } catch (error) {
+      console.error("Failed to generate message:", error);
+      setIsTyping(null);
+    }
+  };
+
+  // Start chat simulation
+  useEffect(() => {
+    if (isActive && timeLeft > 0) {
+      generateNewMessage();
+    }
 
     return () => {
-      console.log("Cleaning up chat effect");
-      isComponentMounted = false;
-      clearInterval(interval);
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
     };
-  }, [isActive, currentVibe]); // Removed timeLeft from dependencies
+  }, [isActive, timeLeft]);
 
   // Timer logic
   useEffect(() => {
-    if (timeLeft > 0) {
+    if (timeLeft > 0 && isActive) {
       const timer = setInterval(() => {
         setTimeLeft((prev) => prev - 1);
       }, 1000);
@@ -232,7 +214,14 @@ export default function LoveShackPage() {
         setSp2((prev) => prev + 100);
       }
     }
-  }, [timeLeft, winner]);
+  }, [timeLeft, winner, isActive]);
+
+  // Scroll to bottom when messages change
+  useEffect(() => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [messages]);
 
   const renderIcon = (
     IconComponent: typeof Heart,
@@ -243,20 +232,14 @@ export default function LoveShackPage() {
 
   return (
     <div className="relative min-h-screen overflow-hidden">
-      {/* Gradient shown while image is loading */}
-      {!imageLoaded && (
-        <div className="fixed inset-0 bg-gradient-to-b from-pink-500 to-rose-600 z-0" />
-      )}
-
       {/* Background Image */}
       <div className="fixed inset-0 z-0">
         <Image
-          src="/places/love-shack.png"
+          src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/love-shack-ty90xbv4S8DIiyFuN88gdckyLWTloN.png"
           alt="Love Shack"
           fill
           className="object-cover"
           priority
-          onLoad={handleImageLoad}
         />
         <div className="absolute inset-0 bg-black/10" />
       </div>
@@ -268,294 +251,149 @@ export default function LoveShackPage() {
                 border-2 border-white/30 shadow-lg hover:bg-white/30 transition-all duration-200
                 hover:scale-105 transform"
       >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="24"
-          height="24"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          className="text-white"
-        >
-          <path d="m12 19-7-7 7-7" />
-          <path d="M19 12H5" />
-        </svg>
+        <ArrowLeft className="w-6 h-6 text-white" />
       </button>
-      {/* Main Content */}
-      <div className="relative z-10 min-h-screen flex items-center justify-center p-4">
-        <div className="w-full max-w-2xl">
-          {/* Avatars and VS Badge */}
-          <div className="flex items-center justify-between mb-4">
-            {/* Islander 1 Avatar */}
-            <div className="flex flex-col items-center gap-2">
-              <div className="relative">
-                <div className="w-16 h-16 rounded-full overflow-hidden border-4 border-white/50 shadow-lg">
-                  <Image
-                    src="https://replicate.delivery/xezq/j1eVwcF0dTTjc6fN8SVwSbLuCn3StTR6vERi5SuvHKXw09UUA/tmpba2mafkc.jpg"
-                    width={64}
-                    height={64}
-                    alt="Islander 1"
-                    className="object-cover"
-                  />
-                </div>
-                <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-white" />
-              </div>
-              <div className="flex flex-col items-center gap-1">
-                <p className="font-display text-sm text-white drop-shadow-md">
-                  Sarah
-                </p>
-                <div className="bg-black/40 backdrop-blur-sm px-3 py-1 rounded-full border border-white/20">
-                  <motion.p
-                    key={sp1}
-                    initial={{ scale: 1 }}
-                    animate={
-                      winner === "islander1" ? { scale: [1, 1.2, 1] } : {}
-                    }
-                    className="font-display text-xs text-white/90"
-                  >
-                    <span className="text-pink-300">SP:</span>{" "}
-                    <span
-                      className={cn(
-                        winner === "islander1"
-                          ? "text-green-400"
-                          : winner === "islander2"
-                          ? "text-red-400"
-                          : "text-white"
-                      )}
-                    >
-                      {sp1}
-                    </span>
-                  </motion.p>
-                </div>
-              </div>
-            </div>
 
-            {/* VS Badge */}
-            <div className="flex flex-col items-center">
-              <div className="relative">
-                <div className="bg-gradient-to-br from-pink-500 to-purple-500 rounded-full p-4 shadow-lg border-2 border-white/20">
-                  <span className="font-title text-2xl text-white drop-shadow-glow">
-                    VS
+      {/* Main Content */}
+      <div className="relative z-10 min-h-screen flex flex-col items-center justify-center p-4">
+        <div className="w-full max-w-2xl">
+          {/* Main Card */}
+          <div className="bg-white/10 backdrop-blur-md rounded-xl border border-white/20 shadow-xl overflow-hidden">
+            {/* Sleek Header */}
+            <div className="bg-pink-500 px-6 py-3 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <MessageCircle className="w-5 h-5 text-white" />
+                <h1 className="font-title text-xl text-white">Love Shack</h1>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="bg-white/20 backdrop-blur-sm rounded-full px-3 py-1 flex items-center gap-1.5">
+                  <span className="text-white text-xs font-display">Time:</span>
+                  <span
+                    className={cn(
+                      "text-white text-xs font-display",
+                      timeLeft <= 10 && "text-red-200 animate-pulse"
+                    )}
+                  >
+                    {timeLeft}s
                   </span>
                 </div>
-                <div className="absolute inset-0 rounded-full bg-white/20 animate-pulse" />
-              </div>
-            </div>
-
-            {/* Islander 2 Avatar */}
-            <div className="flex flex-col items-center gap-2">
-              <div className="relative">
-                <div className="w-16 h-16 rounded-full overflow-hidden border-4 border-white/50 shadow-lg">
-                  <Image
-                    src="https://replicate.delivery/xezq/hDbljQXQNUKMN1fJvoC7506sPKZDLQilVaqQKpVaSjes49UUA/tmpje0oe2wd.jpg"
-                    width={64}
-                    height={64}
-                    alt="Islander 2"
-                    className="object-cover"
-                  />
-                </div>
-                <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-white" />
-              </div>
-              <div className="flex flex-col items-center gap-1">
-                <p className="font-display text-sm text-white drop-shadow-md">
-                  Mike
-                </p>
-                <div className="bg-black/40 backdrop-blur-sm px-3 py-1 rounded-full border border-white/20">
-                  <motion.p
-                    key={sp2}
-                    initial={{ scale: 1 }}
-                    animate={
-                      winner === "islander2" ? { scale: [1, 1.2, 1] } : {}
-                    }
-                    className="font-display text-xs text-white/90"
-                  >
-                    <span className="text-pink-300">SP:</span>{" "}
-                    <span
-                      className={cn(
-                        winner === "islander2"
-                          ? "text-green-400"
-                          : winner === "islander1"
-                          ? "text-red-400"
-                          : "text-white"
-                      )}
-                    >
-                      {sp2}
-                    </span>
-                  </motion.p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Chat Container with Compact Vibe Meter */}
-          <div className="bg-white/10 backdrop-blur-md rounded-xl border border-white/20 shadow-xl overflow-hidden">
-            {/* Compact Vibe Meter */}
-            <div className="h-12 border-b border-white/20 bg-black/20 flex items-center px-4 gap-4">
-              <div className="flex items-center gap-1.5">
-                <span className="text-white/70 text-sm font-display">
-                  Vibe:
-                </span>
                 <motion.div
                   key={currentVibe}
-                  initial={{ scale: 0.5, opacity: 0 }}
+                  initial={{ scale: 0.9, opacity: 0 }}
                   animate={{ scale: 1, opacity: 1 }}
                   className={cn(
                     "px-3 py-1 rounded-full flex items-center gap-1.5",
-                    "bg-gradient-to-r shadow-lg",
+                    "bg-gradient-to-r shadow-sm",
                     VIBES[currentVibe].gradient
                   )}
                 >
-                  {renderIcon(VIBES[currentVibe].icon)}
-                  <span className="text-white text-sm font-display">
+                  {renderIcon(VIBES[currentVibe].icon, "w-3 h-3 text-white")}
+                  <span className="text-white text-xs font-display">
                     {VIBES[currentVibe].label}
                   </span>
                 </motion.div>
               </div>
-
-              {/* Mini Vibe Icons */}
-              <div className="flex gap-2 ml-auto">
-                {Object.entries(VIBES).map(([key, vibe]) => (
-                  <div
-                    key={key}
-                    className={cn(
-                      "w-6 h-6 rounded-full flex items-center justify-center transition-all duration-300",
-                      currentVibe === key
-                        ? cn(
-                            "bg-gradient-to-br shadow-lg scale-110",
-                            vibe.gradient
-                          )
-                        : "bg-white/10"
-                    )}
-                  >
-                    {renderIcon(
-                      vibe.icon,
-                      cn(
-                        "w-3 h-3",
-                        currentVibe === key ? "text-white" : "text-white/40"
-                      )
-                    )}
-                  </div>
-                ))}
-              </div>
-              <div className="ml-4 font-display text-sm">
-                <span
-                  className={cn(
-                    "text-white/70",
-                    timeLeft <= 10 && "text-red-400 animate-pulse"
-                  )}
-                >
-                  {timeLeft}s
-                </span>
-              </div>
             </div>
 
-            {winner && (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="absolute inset-0 z-30 flex items-center justify-center bg-black/40 backdrop-blur-sm rounded-xl"
-              >
-                <motion.div
-                  initial={{ scale: 0.8 }}
-                  animate={{ scale: 1 }}
-                  className="flex items-center gap-8"
-                >
-                  {/* Islander 1 Result */}
-                  <div className="text-center">
-                    <div className="relative mb-2">
-                      <div
+            {/* Chat Container */}
+            <div className="flex flex-col h-[500px]">
+              {/* Participants */}
+              <div className="flex items-center justify-between px-6 py-3 bg-white">
+                {/* Islander 1 */}
+                <div className="flex items-center gap-3">
+                  <div className="relative">
+                    <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-pink-200">
+                      <Image
+                        src="/placeholder.svg?height=40&width=40"
+                        width={40}
+                        height={40}
+                        alt="Islander 1"
+                        className="object-cover"
+                      />
+                    </div>
+                    <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 rounded-full border border-white" />
+                  </div>
+                  <div>
+                    <p className="font-display text-sm text-gray-800 font-medium">
+                      Sarah
+                    </p>
+                    <motion.p
+                      key={sp1}
+                      initial={{ scale: 1 }}
+                      animate={
+                        winner === "islander1" ? { scale: [1, 1.2, 1] } : {}
+                      }
+                      className="font-display text-xs text-gray-500"
+                    >
+                      <span className="text-pink-500">SP:</span>{" "}
+                      <span
                         className={cn(
-                          "w-20 h-20 rounded-full overflow-hidden border-4 shadow-lg",
                           winner === "islander1"
-                            ? "border-green-400"
-                            : "border-red-400"
+                            ? "text-green-600"
+                            : winner === "islander2"
+                              ? "text-red-600"
+                              : "text-gray-600"
                         )}
                       >
-                        <Image
-                          src="https://replicate.delivery/xezq/j1eVwcF0dTTjc6fN8SVwSbLuCn3StTR6vERi5SuvHKXw09UUA/tmpba2mafkc.jpg"
-                          width={80}
-                          height={80}
-                          alt="Islander 1"
-                          className="object-cover"
-                        />
-                      </div>
-                      <motion.div
-                        initial={{ scale: 0, opacity: 0 }}
-                        animate={{ scale: 1, opacity: 1 }}
-                        transition={{ delay: 0.5 }}
-                        className={cn(
-                          "absolute -bottom-2 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full text-sm font-display",
-                          winner === "islander1"
-                            ? "bg-green-500 text-white"
-                            : "bg-red-500 text-white"
-                        )}
-                      >
-                        {winner === "islander1" ? "+100" : "-50"}
-                      </motion.div>
-                    </div>
-                    <p className="font-display text-lg text-white">Sarah</p>
+                        {sp1}
+                      </span>
+                    </motion.p>
                   </div>
+                </div>
 
-                  {/* VS */}
-                  <div className="flex flex-col items-center gap-2">
-                    <div className="font-title text-xl text-white">
-                      Time's Up!
-                    </div>
-                    <div className="font-display text-sm text-white/80">VS</div>
-                  </div>
+                {/* VS */}
+                <div className="bg-gray-100 rounded-full px-3 py-1">
+                  <span className="font-title text-sm text-gray-600">VS</span>
+                </div>
 
-                  {/* Islander 2 Result */}
-                  <div className="text-center">
-                    <div className="relative mb-2">
-                      <div
+                {/* Islander 2 */}
+                <div className="flex items-center gap-3">
+                  <div>
+                    <p className="font-display text-sm text-gray-800 font-medium text-right">
+                      Mike
+                    </p>
+                    <motion.p
+                      key={sp2}
+                      initial={{ scale: 1 }}
+                      animate={
+                        winner === "islander2" ? { scale: [1, 1.2, 1] } : {}
+                      }
+                      className="font-display text-xs text-gray-500 text-right"
+                    >
+                      <span className="text-pink-500">SP:</span>{" "}
+                      <span
                         className={cn(
-                          "w-20 h-20 rounded-full overflow-hidden border-4 shadow-lg",
                           winner === "islander2"
-                            ? "border-green-400"
-                            : "border-red-400"
+                            ? "text-green-600"
+                            : winner === "islander1"
+                              ? "text-red-600"
+                              : "text-gray-600"
                         )}
                       >
-                        <Image
-                          src="https://replicate.delivery/xezq/hDbljQXQNUKMN1fJvoC7506sPKZDLQilVaqQKpVaSjes49UUA/tmpje0oe2wd.jpg"
-                          width={80}
-                          height={80}
-                          alt="Islander 2"
-                          className="object-cover"
-                        />
-                      </div>
-                      <motion.div
-                        initial={{ scale: 0, opacity: 0 }}
-                        animate={{ scale: 1, opacity: 1 }}
-                        transition={{ delay: 0.5 }}
-                        className={cn(
-                          "absolute -bottom-2 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full text-sm font-display",
-                          winner === "islander2"
-                            ? "bg-green-500 text-white"
-                            : "bg-red-500 text-white"
-                        )}
-                      >
-                        {winner === "islander2" ? "+100" : "-50"}
-                      </motion.div>
-                    </div>
-                    <p className="font-display text-lg text-white">Mike</p>
+                        {sp2}
+                      </span>
+                    </motion.p>
                   </div>
-                </motion.div>
-              </motion.div>
-            )}
+                  <div className="relative">
+                    <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-pink-200">
+                      <Image
+                        src="/placeholder.svg?height=40&width=40"
+                        width={40}
+                        height={40}
+                        alt="Islander 2"
+                        className="object-cover"
+                      />
+                    </div>
+                    <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 rounded-full border border-white" />
+                  </div>
+                </div>
+              </div>
 
-            {/* Messages */}
-            <div className="h-[400px] p-4 overflow-y-auto space-y-4 scroll-smooth">
-              <AnimatePresence mode="popLayout">
+              {/* Messages */}
+              <div className="flex-1 p-4 overflow-y-auto space-y-3 scroll-smooth bg-gray-50">
                 {messages.map((message) => (
-                  <motion.div
+                  <div
                     key={message.id}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, scale: 0.8 }}
                     className={cn(
                       "flex",
                       message.sender === "islander2"
@@ -565,68 +403,181 @@ export default function LoveShackPage() {
                   >
                     <div
                       className={cn(
-                        "max-w-[80%] rounded-xl p-3 shadow-md backdrop-blur-sm",
+                        "max-w-[80%] rounded-xl p-3 shadow-sm",
                         message.sender === "islander2"
                           ? cn(
-                              "bg-gradient-to-br text-white rounded-br-none",
-                              VIBES[currentVibe].gradient,
-                              "shadow-lg"
+                              "bg-gradient-to-r text-white rounded-br-none",
+                              VIBES[currentVibe].gradient
                             )
                           : cn(
-                              "bg-white/90 rounded-bl-none",
-                              "border-2",
-                              "border-transparent",
-                              "bg-gradient-to-br from-white/90 to-white/95"
+                              "bg-white rounded-bl-none",
+                              "border",
+                              "border-gray-200"
                             )
                       )}
                     >
                       <p
                         className={cn(
-                          "text-sm",
+                          "text-sm font-display",
                           message.sender === "islander2"
                             ? "text-white"
-                            : cn(
-                                "bg-gradient-to-br bg-clip-text text-transparent",
-                                VIBES[currentVibe].gradient
-                              )
+                            : "text-gray-800"
                         )}
                       >
                         {message.text}
                       </p>
-                    </div>
-                  </motion.div>
-                ))}
-              </AnimatePresence>
-
-              {/* Positioned Typing Indicators */}
-              {isTyping && (
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className={cn(
-                    "flex my-4",
-                    isTyping === "islander2" ? "justify-end" : "justify-start"
-                  )}
-                >
-                  <div className="bg-white/10 backdrop-blur-sm rounded-full py-3 px-4">
-                    <div className="flex gap-1">
-                      <span className="w-2 h-2 bg-white/50 rounded-full animate-bounce" />
-                      <span
-                        className="w-2 h-2 bg-white/50 rounded-full animate-bounce"
-                        style={{ animationDelay: "0.2s" }}
-                      />
-                      <span
-                        className="w-2 h-2 bg-white/50 rounded-full animate-bounce"
-                        style={{ animationDelay: "0.4s" }}
-                      />
+                      <p
+                        className={cn(
+                          "text-[10px] text-right mt-1 font-display",
+                          message.sender === "islander2"
+                            ? "text-white/70"
+                            : "text-gray-400"
+                        )}
+                      >
+                        {message.timestamp}
+                      </p>
                     </div>
                   </div>
-                </motion.div>
-              )}
+                ))}
 
-              {/* Invisible div for auto-scrolling */}
-              <div ref={messagesEndRef} className="h-px" />
+                {/* Typing Indicator */}
+                {isTyping && (
+                  <div
+                    className={cn(
+                      "flex gap-2 items-center",
+                      isTyping === "islander2" ? "justify-end" : "justify-start"
+                    )}
+                  >
+                    <div className="bg-gray-200 rounded-full px-3 py-1.5 flex items-center gap-2">
+                      <div className="flex gap-1">
+                        <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" />
+                        <span
+                          className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce"
+                          style={{ animationDelay: "0.2s" }}
+                        />
+                        <span
+                          className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce"
+                          style={{ animationDelay: "0.4s" }}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Scroll anchor */}
+                <div ref={messagesEndRef} />
+              </div>
             </div>
+
+            {winner && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="absolute inset-0 z-30 flex items-center justify-center bg-black/60 backdrop-blur-sm rounded-xl"
+              >
+                <motion.div
+                  initial={{ scale: 0.8 }}
+                  animate={{ scale: 1 }}
+                  className="bg-white rounded-xl p-6 shadow-xl max-w-md w-full"
+                >
+                  <h2 className="font-title text-2xl text-center text-gray-800 mb-6">
+                    Time's Up!
+                  </h2>
+
+                  <div className="flex items-center justify-between mb-8">
+                    {/* Islander 1 Result */}
+                    <div className="text-center">
+                      <div className="relative mb-2">
+                        <div
+                          className={cn(
+                            "w-16 h-16 rounded-full overflow-hidden border-2 shadow-md mx-auto",
+                            winner === "islander1"
+                              ? "border-green-400"
+                              : "border-red-400"
+                          )}
+                        >
+                          <Image
+                            src="/placeholder.svg?height=64&width=64"
+                            width={64}
+                            height={64}
+                            alt="Islander 1"
+                            className="object-cover"
+                          />
+                        </div>
+                        <motion.div
+                          initial={{ scale: 0, opacity: 0 }}
+                          animate={{ scale: 1, opacity: 1 }}
+                          transition={{ delay: 0.5 }}
+                          className={cn(
+                            "absolute -bottom-2 left-1/2 -translate-x-1/2 px-2 py-0.5 rounded-full text-xs font-display",
+                            winner === "islander1"
+                              ? "bg-green-500 text-white"
+                              : "bg-red-500 text-white"
+                          )}
+                        >
+                          {winner === "islander1" ? "+100" : "-50"}
+                        </motion.div>
+                      </div>
+                      <p className="font-display text-sm text-gray-800">
+                        Sarah
+                      </p>
+                    </div>
+
+                    {/* Result Indicator */}
+                    <div className="flex flex-col items-center">
+                      <div className="font-title text-lg text-pink-500 mb-1">
+                        Winner!
+                      </div>
+                      <div className="w-16 h-0.5 bg-gradient-to-r from-pink-300 to-purple-300 rounded-full"></div>
+                    </div>
+
+                    {/* Islander 2 Result */}
+                    <div className="text-center">
+                      <div className="relative mb-2">
+                        <div
+                          className={cn(
+                            "w-16 h-16 rounded-full overflow-hidden border-2 shadow-md mx-auto",
+                            winner === "islander2"
+                              ? "border-green-400"
+                              : "border-red-400"
+                          )}
+                        >
+                          <Image
+                            src="/placeholder.svg?height=64&width=64"
+                            width={64}
+                            height={64}
+                            alt="Islander 2"
+                            className="object-cover"
+                          />
+                        </div>
+                        <motion.div
+                          initial={{ scale: 0, opacity: 0 }}
+                          animate={{ scale: 1, opacity: 1 }}
+                          transition={{ delay: 0.5 }}
+                          className={cn(
+                            "absolute -bottom-2 left-1/2 -translate-x-1/2 px-2 py-0.5 rounded-full text-xs font-display",
+                            winner === "islander2"
+                              ? "bg-green-500 text-white"
+                              : "bg-red-500 text-white"
+                          )}
+                        >
+                          {winner === "islander2" ? "+100" : "-50"}
+                        </motion.div>
+                      </div>
+                      <p className="font-display text-sm text-gray-800">Mike</p>
+                    </div>
+                  </div>
+
+                  <button
+                    onClick={() => router.push("/island")}
+                    className="w-full bg-gradient-to-r from-pink-500 to-purple-500 text-white py-2 rounded-lg font-display text-sm shadow-sm hover:from-pink-600 hover:to-purple-600 transition-colors"
+                  >
+                    Return to Island
+                  </button>
+                </motion.div>
+              </motion.div>
+            )}
           </div>
         </div>
       </div>
