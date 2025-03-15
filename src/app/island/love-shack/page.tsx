@@ -76,34 +76,6 @@ const VIBES: Record<VibeType, VibeState> = {
   },
 };
 
-const CONVERSATIONS: Record<VibeType, string[]> = {
-  romantic: [
-    "The sunset looks magical... just like your eyes ✨",
-    "You make my heart skip a beat every time you smile 💖",
-    "I've never felt this way about anyone before...",
-  ],
-  flirty: [
-    "Is it hot in here or is it just you? 🔥",
-    "That swimsuit looks amazing on you 😘",
-    "Maybe we should take a midnight swim together?",
-  ],
-  fun: [
-    "Let's have a dance party! 💃🕺",
-    "Race you to the water! 🏃‍♂️",
-    "You're hilarious! Tell me another joke 😂",
-  ],
-  boring: [
-    "So... what's your favorite color? 😕",
-    "The weather is... nice today.",
-    "I had cereal for breakfast...",
-  ],
-  angry: [
-    "I saw you talking to them earlier 😠",
-    "Why are you being like this?",
-    "Maybe we need some space...",
-  ],
-};
-
 export default function LoveShackPage() {
   const [currentVibe, setCurrentVibe] = useState<VibeType>("romantic");
   const [messages, setMessages] = useState<Message[]>([]);

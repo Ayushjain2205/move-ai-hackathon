@@ -6,7 +6,15 @@ import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Coins, ShoppingBag, Sparkles } from "lucide-react";
+import {
+  ArrowLeft,
+  ShoppingBag,
+  Sparkles,
+  Heart,
+  Star,
+  Gift,
+  Crown,
+} from "lucide-react";
 import { useImageLoading } from "@/hooks/useImageLoading";
 
 interface ShopItem {
@@ -17,6 +25,8 @@ interface ShopItem {
   image: string;
   category: "him" | "her" | "both" | "gift";
   type: "clothing" | "accessory" | "emote" | "background" | "gift";
+  popular?: boolean;
+  new?: boolean;
 }
 
 const SHOP_ITEMS: ShopItem[] = [
@@ -29,6 +39,7 @@ const SHOP_ITEMS: ShopItem[] = [
     image: "/gifts/bracelet.png",
     category: "gift",
     type: "gift",
+    popular: true,
   },
   {
     id: "crown-of-excellence",
@@ -74,6 +85,7 @@ const SHOP_ITEMS: ShopItem[] = [
     image: "/gifts/locket.png",
     category: "gift",
     type: "gift",
+    new: true,
   },
   {
     id: "enchanted-mirror",
@@ -101,6 +113,7 @@ const SHOP_ITEMS: ShopItem[] = [
     image: "/gifts/ring.png",
     category: "gift",
     type: "gift",
+    new: true,
   },
   {
     id: "sunglasses",
@@ -121,6 +134,7 @@ const SHOP_ITEMS: ShopItem[] = [
     image: "/placeholder.svg?height=400&width=400",
     category: "him",
     type: "clothing",
+    popular: true,
   },
   {
     id: "summer-shirt",
@@ -148,6 +162,7 @@ const SHOP_ITEMS: ShopItem[] = [
     image: "/placeholder.svg?height=400&width=400",
     category: "him",
     type: "emote",
+    new: true,
   },
 
   // For Her
@@ -159,6 +174,7 @@ const SHOP_ITEMS: ShopItem[] = [
     image: "/placeholder.svg?height=400&width=400",
     category: "her",
     type: "clothing",
+    popular: true,
   },
   {
     id: "beach-hat",
@@ -186,6 +202,7 @@ const SHOP_ITEMS: ShopItem[] = [
     image: "/placeholder.svg?height=400&width=400",
     category: "her",
     type: "emote",
+    new: true,
   },
 
   // For Both
@@ -197,6 +214,7 @@ const SHOP_ITEMS: ShopItem[] = [
     image: "/placeholder.svg?height=400&width=400",
     category: "both",
     type: "background",
+    popular: true,
   },
   {
     id: "couple-emote",
@@ -206,6 +224,7 @@ const SHOP_ITEMS: ShopItem[] = [
     image: "/placeholder.svg?height=400&width=400",
     category: "both",
     type: "emote",
+    new: true,
   },
 ];
 
@@ -223,6 +242,7 @@ export default function TradingPostPage() {
   const [categoryFilter, setCategoryFilter] = useState<CategoryFilter>("all");
   const [typeFilter, setTypeFilter] = useState<TypeFilter>("all");
   const [purchasing, setPurchasing] = useState<string | null>(null);
+  const [heartBalance] = useState(5000);
   const { imageLoaded, handleImageLoad } = useImageLoading(
     "/places/trading-post.png"
   );
@@ -265,8 +285,8 @@ export default function TradingPostPage() {
       {/* Back Button */}
       <button
         onClick={() => router.push("/island")}
-        className="fixed top-4 left-4 z-20 bg-white/20 backdrop-blur-sm rounded-full p-2 
-                border-2 border-white/30 shadow-lg hover:bg-white/30 transition-all duration-200
+        className="fixed top-4 left-4 z-20 bg-white/30 backdrop-blur-sm rounded-full p-2 
+                border-2 border-white/40 shadow-lg hover:bg-white/40 transition-all duration-200
                 hover:scale-105 transform"
       >
         <ArrowLeft className="w-6 h-6 text-white" />
@@ -274,55 +294,55 @@ export default function TradingPostPage() {
 
       {/* Main Content */}
       <div className="relative z-10 min-h-screen flex items-center justify-center p-4">
-        <div className="w-full max-w-2xl">
-          <div className="bg-white/10 backdrop-blur-md rounded-xl border border-white/20 shadow-xl overflow-hidden">
+        <div className="w-full max-w-4xl">
+          <div className="bg-white/20 backdrop-blur-sm rounded-xl border border-white/30 shadow-xl overflow-hidden">
             {/* Header */}
-            <div className="bg-gradient-to-r from-purple-500/80 to-pink-500/80 p-4 text-center border-b border-white/20">
-              <div className="flex items-center justify-center gap-3">
+            <div className="bg-gradient-to-r from-pink-500 to-purple-500 p-4 flex items-center justify-between border-b border-white/30">
+              <div className="flex items-center gap-3">
                 <ShoppingBag className="w-6 h-6 text-white" />
-                <h1 className="font-title text-2xl text-white">Trading Post</h1>
+                <h1 className="font-title text-2xl text-white">Island Shop</h1>
               </div>
-              <p className="font-handwritten text-lg text-white/90 mt-1">
-                upgrade your island style
-              </p>
+              <div className="bg-white/30 backdrop-blur-sm rounded-full px-4 py-2 flex items-center gap-2 border border-white/40">
+                <Heart className="w-5 h-5 text-pink-200" />
+                <span className="font-title text-white text-lg">
+                  {heartBalance}
+                </span>
+              </div>
             </div>
 
-            {/* Filters */}
-            <div className="p-4 border-b border-white/10">
-              <div className="space-y-3">
+            {/* Filters - Single Row */}
+            <div className="p-3 bg-white/15 border-b border-white/20">
+              <div className="flex items-center justify-between">
                 {/* Category Filters */}
-                <div className="flex flex-wrap gap-2">
+                <div className="flex items-center gap-1.5">
                   {(["all", "gift", "him", "her", "both"] as const).map(
                     (category) => (
                       <button
                         key={category}
                         onClick={() => setCategoryFilter(category)}
                         className={cn(
-                          "px-3 py-1.5 rounded-lg border-2 transition-all duration-200",
-                          "font-display text-xs",
+                          "px-2 py-1 rounded-lg transition-all duration-200",
+                          "font-title text-xs border",
                           categoryFilter === category
-                            ? "bg-gradient-to-r from-pink-500/20 to-purple-500/20 border-white"
-                            : "bg-white/5 border-white/20 hover:bg-white/10"
+                            ? "bg-gradient-to-r from-pink-500 to-purple-500 border-white text-white"
+                            : "bg-white/20 border-white/30 hover:bg-white/30 text-white"
                         )}
                       >
-                        <span className="text-white capitalize">
-                          {category === "all"
-                            ? "All Items"
-                            : category === "gift"
+                        {category === "all"
+                          ? "All"
+                          : category === "gift"
                             ? "Gifts"
-                            : `For ${category}`}
-                        </span>
+                            : category}
                       </button>
                     )
                   )}
                 </div>
 
                 {/* Type Filters */}
-                <div className="flex flex-wrap gap-2">
+                <div className="flex items-center gap-1.5">
                   {(
                     [
                       "all",
-                      "gift",
                       "clothing",
                       "accessory",
                       "emote",
@@ -333,15 +353,15 @@ export default function TradingPostPage() {
                       key={type}
                       onClick={() => setTypeFilter(type)}
                       className={cn(
-                        "px-3 py-1.5 rounded-lg border-2 transition-all duration-200",
-                        "font-display text-xs",
+                        "px-2 py-1 rounded-lg transition-all duration-200",
+                        "font-title text-xs border",
                         typeFilter === type
-                          ? "bg-gradient-to-r from-pink-500/20 to-purple-500/20 border-white"
-                          : "bg-white/5 border-white/20 hover:bg-white/10"
+                          ? "bg-gradient-to-r from-pink-500 to-purple-500 border-white text-white"
+                          : "bg-white/20 border-white/30 hover:bg-white/30 text-white"
                       )}
                     >
-                      <span className="text-white capitalize">
-                        {type === "all" ? "All Types" : type}
+                      <span className="capitalize">
+                        {type === "all" ? "All" : type}
                       </span>
                     </button>
                   ))}
@@ -350,8 +370,8 @@ export default function TradingPostPage() {
             </div>
 
             {/* Items Grid */}
-            <div className="h-[400px] overflow-y-auto p-4">
-              <div className="grid grid-cols-2 gap-4">
+            <div className="h-[500px] overflow-y-auto p-3 bg-white/10">
+              <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">
                 <AnimatePresence mode="popLayout">
                   {filteredItems.map((item) => (
                     <motion.div
@@ -360,62 +380,99 @@ export default function TradingPostPage() {
                       initial={{ opacity: 0, scale: 0.9 }}
                       animate={{ opacity: 1, scale: 1 }}
                       exit={{ opacity: 0, scale: 0.9 }}
+                      transition={{ duration: 0.3 }}
                       className="group"
                     >
-                      <div className="bg-white/10 backdrop-blur-sm rounded-lg border border-white/20 overflow-hidden">
+                      <div className="rounded-xl overflow-hidden border border-white/30 hover:border-white/50 transition-all duration-300 hover:shadow-sm">
                         {/* Item Image */}
                         <div className="aspect-square relative overflow-hidden">
                           <Image
                             src={item.image || "/placeholder.svg"}
                             alt={item.name}
                             fill
-                            className="object-cover transition-transform duration-300 group-hover:scale-110"
+                            className="object-cover transition-transform duration-500 group-hover:scale-110"
                           />
-                          <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
 
-                          {/* Category Badge */}
-                          <div className="absolute top-2 right-2">
-                            <div className="bg-black/40 backdrop-blur-sm px-2 py-0.5 rounded-full border border-white/20">
-                              <span className="text-white text-[10px] font-display capitalize">
-                                {item.category}
-                              </span>
+                          {/* Badges */}
+                          <div className="absolute top-1 left-1 flex gap-1">
+                            {item.popular && (
+                              <div className="bg-gradient-to-r from-amber-500 to-yellow-500 px-1 py-0.5 rounded-full border border-white/40">
+                                <div className="flex items-center gap-0.5">
+                                  <Star className="w-2 h-2 text-white" />
+                                  <span className="text-white text-[8px] font-title">
+                                    Hot
+                                  </span>
+                                </div>
+                              </div>
+                            )}
+                            {item.new && (
+                              <div className="bg-gradient-to-r from-green-500 to-emerald-500 px-1 py-0.5 rounded-full border border-white/40">
+                                <div className="flex items-center gap-0.5">
+                                  <Sparkles className="w-2 h-2 text-white" />
+                                  <span className="text-white text-[8px] font-title">
+                                    New
+                                  </span>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Item Type Icon */}
+                          <div className="absolute bottom-1 left-1">
+                            <div className="bg-white/30 backdrop-blur-[2px] p-1 rounded-full border border-white/40">
+                              {item.type === "clothing" && (
+                                <Crown className="w-2.5 h-2.5 text-white" />
+                              )}
+                              {item.type === "accessory" && (
+                                <Star className="w-2.5 h-2.5 text-white" />
+                              )}
+                              {item.type === "emote" && (
+                                <Gift className="w-2.5 h-2.5 text-white" />
+                              )}
+                              {item.type === "background" && (
+                                <Sparkles className="w-2.5 h-2.5 text-white" />
+                              )}
+                              {item.type === "gift" && (
+                                <Gift className="w-2.5 h-2.5 text-white" />
+                              )}
                             </div>
                           </div>
                         </div>
 
-                        {/* Item Details */}
-                        <div className="p-3">
-                          <h3 className="font-display text-sm text-white mb-1 truncate">
+                        {/* Item Details - White Background */}
+                        <div className="p-1.5 bg-white">
+                          <h3 className="font-title text-xs text-gray-800 mb-0.5 truncate">
                             {item.name}
                           </h3>
-                          <p className="text-white/70 text-xs mb-3 line-clamp-2">
+                          <p className="text-gray-600 text-[10px] font-body mb-1.5 line-clamp-1">
                             {item.description}
                           </p>
 
                           <div className="flex items-center justify-between">
                             <div
-                              className="bg-gradient-to-r from-pink-500/20 to-purple-500/20 
-                border border-pink-500/30 rounded-full px-2 py-0.5
-                flex items-center gap-1"
+                              className="bg-pink-100 
+                                      border border-pink-300 rounded-full px-1.5 py-0.5
+                                      flex items-center gap-0.5"
                             >
-                              <Coins className="w-3 h-3 text-pink-400" />
-                              <span className="font-display text-sm text-white">
+                              <Heart className="w-2.5 h-2.5 text-pink-500" />
+                              <span className="font-title text-[10px] text-pink-700">
                                 {item.price}
                               </span>
                             </div>
                             <Button
                               onClick={() => handlePurchase(item.id)}
                               disabled={purchasing === item.id}
-                              size="sm"
-                              className="h-7 text-xs bg-gradient-to-r from-pink-500 to-purple-500 text-white 
-                                       border border-white/20 hover:from-pink-600 hover:to-purple-600"
+                              className="bg-gradient-to-r from-pink-500 to-purple-500 text-white 
+                                     border border-white/30 hover:from-pink-600 hover:to-purple-600
+                                     font-title px-1.5 py-0 h-5 text-[10px]"
                             >
                               {purchasing === item.id ? (
-                                <div className="h-3 w-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                                <div className="h-2.5 w-2.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
                               ) : (
                                 <>
                                   Buy
-                                  <Sparkles className="w-3 h-3 ml-1" />
+                                  <Sparkles className="w-2 h-2 ml-0.5" />
                                 </>
                               )}
                             </Button>
