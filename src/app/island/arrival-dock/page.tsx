@@ -16,7 +16,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ArrowLeft, Heart, Sparkles, Wand2 } from "lucide-react";
+import {
+  ArrowLeft,
+  Heart,
+  Sparkles,
+  Wand2,
+  Trophy,
+  Star,
+  PartyPopper,
+} from "lucide-react";
 import { useImageLoading } from "@/hooks/useImageLoading";
 
 interface IslanderFormData {
@@ -274,16 +282,42 @@ export default function ArrivalDockPage() {
               animate={{ scale: 1, opacity: 1 }}
               className="bg-white/10 backdrop-blur-md rounded-xl border border-white/20 shadow-xl overflow-hidden"
             >
-              <div className="bg-gradient-to-r from-purple-500/80 to-pink-500/80 p-4 text-center border-b border-white/20">
-                <h1 className="font-title text-2xl text-white">
-                  Welcome to Paradise!
-                </h1>
+              {/* Success Header - Matching the form header style */}
+              <div className="bg-gradient-to-r from-purple-600/90 to-pink-600/90 p-5 border-b border-white/20 relative overflow-hidden">
+                <div className="flex items-center justify-center gap-3">
+                  <Trophy className="w-6 h-6 text-white animate-pulse" />
+                  <h1 className="font-title text-2xl text-white drop-shadow-sm">
+                    Islander Created!
+                  </h1>
+                </div>
+
+                {/* Animated particles */}
+                <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
+                  <div className="absolute -top-2 left-1/4 animate-float-slow">
+                    <Star className="w-4 h-4 text-yellow-300" />
+                  </div>
+                  <div className="absolute top-1/2 right-1/4 animate-float">
+                    <Heart className="w-4 h-4 text-pink-300" />
+                  </div>
+                  <div className="absolute bottom-0 right-1/3 animate-float-delayed">
+                    <Sparkles className="w-4 h-4 text-white" />
+                  </div>
+                </div>
               </div>
-              <div className="p-6">
-                <div className="grid grid-cols-[40%_60%] gap-6">
+
+              <div className="p-8">
+                {/* Welcome message */}
+                <div className="text-center mb-6">
+                  <p className="font-handwritten text-xl text-white/90">
+                    Welcome to paradise
+                  </p>
+                  <div className="w-full h-0.5 bg-gradient-to-r from-transparent via-white/30 to-transparent mt-1"></div>
+                </div>
+
+                <div className="grid grid-cols-[40%_60%] gap-8">
                   {/* Left side - Avatar */}
-                  <div className="space-y-4">
-                    <div className="aspect-square w-full rounded-xl overflow-hidden border-2 border-white/20 relative">
+                  <div className="space-y-5">
+                    <div className="aspect-square w-full rounded-xl overflow-hidden border-2 border-white/30 relative shadow-glow">
                       <Image
                         src={avatarUrl! || "/placeholder.svg"}
                         alt="Your islander"
@@ -291,37 +325,34 @@ export default function ArrivalDockPage() {
                         height={300}
                         className="object-cover w-full h-full"
                       />
+
+                      {/* Decorative corner elements */}
+                      <div className="absolute top-2 left-2">
+                        <PartyPopper className="w-5 h-5 text-pink-300" />
+                      </div>
+                      <div className="absolute bottom-2 right-2">
+                        <Heart className="w-5 h-5 text-pink-300" />
+                      </div>
                     </div>
-                    <div className="flex flex-col gap-2">
-                      <Button
-                        onClick={() => setSubmissionStatus("idle")}
-                        variant="outline"
-                        className="bg-white/10 border-white/20 text-white hover:bg-white/20 w-full font-title"
-                        size="sm"
-                      >
-                        <Wand2 className="w-4 h-4 mr-2" />
-                        Generate Again
-                      </Button>
-                      <Button
-                        onClick={handleEnterIsland}
-                        className="bg-gradient-to-r from-pink-500 to-purple-500 text-white border-2 border-white/20
-                                 hover:from-pink-600 hover:to-purple-600 w-full font-title"
-                        size="sm"
-                      >
-                        <Heart className="w-4 h-4 mr-2" />
-                        Enter Paradise
-                        <Sparkles className="w-4 h-4 ml-2" />
-                      </Button>
-                    </div>
+
+                    <Button
+                      onClick={() => setSubmissionStatus("idle")}
+                      variant="outline"
+                      className="bg-white/10 border-white/20 text-white hover:bg-white/20 w-full font-title"
+                      size="sm"
+                    >
+                      <Wand2 className="w-4 h-4 mr-2" />
+                      Generate Again
+                    </Button>
                   </div>
 
                   {/* Right side - Details */}
-                  <div className="space-y-4">
+                  <div className="space-y-4 pr-2">
                     <div>
                       <h2 className="font-title text-3xl text-white mb-2">
                         {formData.name}
                       </h2>
-                      <div className="inline-block bg-white/10 backdrop-blur-sm rounded-lg border border-white/20 py-2 px-3">
+                      <div className="inline-block bg-gradient-to-r from-pink-500/20 to-purple-500/20 backdrop-blur-sm rounded-lg border border-white/20 py-2 px-3">
                         <p className="font-title text-lg text-white">
                           {
                             PERSONALITY_VIBES.find(
@@ -338,7 +369,7 @@ export default function ArrivalDockPage() {
                     </div>
 
                     <div className="grid grid-cols-2 gap-3">
-                      <div className="bg-white/5 rounded-lg p-3 border border-white/10">
+                      <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 border border-white/20">
                         <p className="text-white/80 text-sm mb-1 font-handwritten">
                           Appearance
                         </p>
@@ -353,7 +384,7 @@ export default function ArrivalDockPage() {
                           {formData.appearance.outfitStyle} Style
                         </p>
                       </div>
-                      <div className="bg-white/5 rounded-lg p-3 border border-white/10">
+                      <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 border border-white/20">
                         <p className="text-white/80 text-sm mb-1 font-handwritten">
                           Top Traits
                         </p>
@@ -371,7 +402,7 @@ export default function ArrivalDockPage() {
                       </div>
                     </div>
 
-                    <div className="bg-white/5 rounded-lg p-3 border border-white/10">
+                    <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 border border-white/20">
                       <p className="text-white/80 text-sm mb-1 font-handwritten">
                         Signature Move
                       </p>
@@ -389,7 +420,7 @@ export default function ArrivalDockPage() {
                       </p>
                     </div>
 
-                    <div className="bg-white/5 rounded-lg p-3 border border-white/10">
+                    <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 border border-white/20">
                       <p className="text-white/80 text-sm mb-1 font-handwritten">
                         Intro
                       </p>
@@ -398,6 +429,32 @@ export default function ArrivalDockPage() {
                       </p>
                     </div>
                   </div>
+                </div>
+
+                {/* Bottom CTA - Replacing the "Your island adventure awaits!" text */}
+                <div className="mt-8">
+                  <div className="w-full h-0.5 bg-gradient-to-r from-transparent via-white/30 to-transparent mb-5"></div>
+
+                  <motion.div
+                    initial={{ scale: 0.95 }}
+                    animate={{ scale: 1 }}
+                    transition={{
+                      repeat: Number.POSITIVE_INFINITY,
+                      repeatType: "reverse",
+                      duration: 1.5,
+                    }}
+                  >
+                    <Button
+                      onClick={handleEnterIsland}
+                      className="bg-gradient-to-r from-pink-500 to-purple-500 text-white hover:from-pink-600 hover:to-purple-600 
+                                border-2 border-white/30 w-full font-title py-6 relative overflow-hidden group shadow-glow"
+                    >
+                      <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                      <Heart className="w-6 h-6 mr-3 animate-pulse" />
+                      <span className="text-xl">Enter Paradise</span>
+                      <Sparkles className="w-6 h-6 ml-3" />
+                    </Button>
+                  </motion.div>
                 </div>
               </div>
             </motion.div>
