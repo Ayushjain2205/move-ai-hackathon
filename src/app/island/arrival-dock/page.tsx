@@ -9,7 +9,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { ArrowLeft, Heart, Sparkles, Wand2 } from "lucide-react";
 import { useImageLoading } from "@/hooks/useImageLoading";
 
@@ -88,9 +94,56 @@ export default function ArrivalDockPage() {
     introLine: "",
   });
 
-  const [submissionStatus, setSubmissionStatus] = useState<"idle" | "creating" | "generating" | "success">("idle");
+  const [submissionStatus, setSubmissionStatus] = useState<
+    "idle" | "creating" | "generating" | "success"
+  >("idle");
 
-  const { imageLoaded, handleImageLoad } = useImageLoading("/places/arrival-dock.png");
+  // Validation functions for each step
+  const validateStep1 = () => {
+    return (
+      formData.name.trim() !== "" &&
+      formData.gender !== "" &&
+      formData.personalityVibe !== ""
+    );
+  };
+
+  const validateStep2 = () => {
+    return (
+      formData.appearance.faceShape !== "" &&
+      formData.appearance.skinTone !== "" &&
+      formData.appearance.hairStyle !== "" &&
+      formData.appearance.hairColor !== "" &&
+      formData.appearance.outfitStyle !== ""
+    );
+  };
+
+  const validateStep3 = () => {
+    return remainingTraitPoints >= 0;
+  };
+
+  const validateStep4 = () => {
+    return formData.signatureMove !== "" && formData.introLine !== "";
+  };
+
+  // Get validation status for current step
+  const isCurrentStepValid = () => {
+    switch (step) {
+      case 1:
+        return validateStep1();
+      case 2:
+        return validateStep2();
+      case 3:
+        return validateStep3();
+      case 4:
+        return validateStep4();
+      default:
+        return false;
+    }
+  };
+
+  const { imageLoaded, handleImageLoad } = useImageLoading(
+    "/places/arrival-dock.png"
+  );
 
   const updateFormData = (field: string, value: any) => {
     setFormData((prev) => {
@@ -117,7 +170,9 @@ export default function ArrivalDockPage() {
   };
 
   const handleNext = () => {
-    setStep((prev) => prev + 1);
+    if (isCurrentStepValid()) {
+      setStep((prev) => prev + 1);
+    }
   };
 
   const handleBack = () => {
@@ -177,12 +232,15 @@ export default function ArrivalDockPage() {
     router.push("/island");
   };
 
-  const remainingTraitPoints = 25 - Object.values(formData.traits).reduce((a, b) => a + b, 0);
+  const remainingTraitPoints =
+    25 - Object.values(formData.traits).reduce((a, b) => a + b, 0);
 
   return (
     <div className="relative min-h-screen overflow-hidden">
       {/* Gradient shown while image is loading */}
-      {!imageLoaded && <div className="fixed inset-0 bg-gradient-to-b from-indigo-500 to-purple-600 z-0" />}
+      {!imageLoaded && (
+        <div className="fixed inset-0 bg-gradient-to-b from-indigo-500 to-purple-600 z-0" />
+      )}
 
       {/* Background Image */}
       <div className="fixed inset-0 z-0">
@@ -217,7 +275,9 @@ export default function ArrivalDockPage() {
               className="bg-white/10 backdrop-blur-md rounded-xl border border-white/20 shadow-xl overflow-hidden"
             >
               <div className="bg-gradient-to-r from-purple-500/80 to-pink-500/80 p-4 text-center border-b border-white/20">
-                <h1 className="font-title text-2xl text-white">Welcome to Paradise!</h1>
+                <h1 className="font-title text-2xl text-white">
+                  Welcome to Paradise!
+                </h1>
               </div>
               <div className="p-6">
                 <div className="grid grid-cols-[40%_60%] gap-6">
@@ -225,7 +285,7 @@ export default function ArrivalDockPage() {
                   <div className="space-y-4">
                     <div className="aspect-square w-full rounded-xl overflow-hidden border-2 border-white/20 relative">
                       <Image
-                        src={avatarUrl!}
+                        src={avatarUrl! || "/placeholder.svg"}
                         alt="Your islander"
                         width={300}
                         height={300}
@@ -236,7 +296,7 @@ export default function ArrivalDockPage() {
                       <Button
                         onClick={() => setSubmissionStatus("idle")}
                         variant="outline"
-                        className="bg-white/10 border-white/20 text-white hover:bg-white/20 w-full"
+                        className="bg-white/10 border-white/20 text-white hover:bg-white/20 w-full font-title"
                         size="sm"
                       >
                         <Wand2 className="w-4 h-4 mr-2" />
@@ -245,7 +305,7 @@ export default function ArrivalDockPage() {
                       <Button
                         onClick={handleEnterIsland}
                         className="bg-gradient-to-r from-pink-500 to-purple-500 text-white border-2 border-white/20
-                                 hover:from-pink-600 hover:to-purple-600 w-full"
+                                 hover:from-pink-600 hover:to-purple-600 w-full font-title"
                         size="sm"
                       >
                         <Heart className="w-4 h-4 mr-2" />
@@ -258,33 +318,53 @@ export default function ArrivalDockPage() {
                   {/* Right side - Details */}
                   <div className="space-y-4">
                     <div>
-                      <h2 className="font-display text-3xl text-white mb-2">{formData.name}</h2>
+                      <h2 className="font-title text-3xl text-white mb-2">
+                        {formData.name}
+                      </h2>
                       <div className="inline-block bg-white/10 backdrop-blur-sm rounded-lg border border-white/20 py-2 px-3">
-                        <p className="font-display text-lg text-white">
-                          {PERSONALITY_VIBES.find((v) => v.value === formData.personalityVibe)?.emoji}{" "}
-                          {PERSONALITY_VIBES.find((v) => v.value === formData.personalityVibe)?.label}
+                        <p className="font-title text-lg text-white">
+                          {
+                            PERSONALITY_VIBES.find(
+                              (v) => v.value === formData.personalityVibe
+                            )?.emoji
+                          }{" "}
+                          {
+                            PERSONALITY_VIBES.find(
+                              (v) => v.value === formData.personalityVibe
+                            )?.label
+                          }
                         </p>
                       </div>
                     </div>
 
                     <div className="grid grid-cols-2 gap-3">
                       <div className="bg-white/5 rounded-lg p-3 border border-white/10">
-                        <p className="text-white/80 text-sm mb-1">Appearance</p>
-                        <p className="text-white font-display">
-                          {formData.appearance.hairStyle} {formData.appearance.hairColor} Hair
+                        <p className="text-white/80 text-sm mb-1 font-handwritten">
+                          Appearance
                         </p>
-                        <p className="text-white font-display">{formData.appearance.skinTone} Skin</p>
-                        <p className="text-white font-display capitalize mt-1">
+                        <p className="text-white font-title">
+                          {formData.appearance.hairStyle}{" "}
+                          {formData.appearance.hairColor} Hair
+                        </p>
+                        <p className="text-white font-title">
+                          {formData.appearance.skinTone} Skin
+                        </p>
+                        <p className="text-white font-title capitalize mt-1">
                           {formData.appearance.outfitStyle} Style
                         </p>
                       </div>
                       <div className="bg-white/5 rounded-lg p-3 border border-white/10">
-                        <p className="text-white/80 text-sm mb-1">Top Traits</p>
+                        <p className="text-white/80 text-sm mb-1 font-handwritten">
+                          Top Traits
+                        </p>
                         {Object.entries(formData.traits)
                           .sort(([, a], [, b]) => b - a)
                           .slice(0, 3)
                           .map(([trait, value]) => (
-                            <p key={trait} className="text-white font-display capitalize">
+                            <p
+                              key={trait}
+                              className="text-white font-title capitalize"
+                            >
                               {trait}: {value}/10
                             </p>
                           ))}
@@ -292,16 +372,30 @@ export default function ArrivalDockPage() {
                     </div>
 
                     <div className="bg-white/5 rounded-lg p-3 border border-white/10">
-                      <p className="text-white/80 text-sm mb-1">Signature Move</p>
-                      <p className="text-white font-display">
-                        {SIGNATURE_MOVES.find((m) => m.value === formData.signatureMove)?.emoji}{" "}
-                        {SIGNATURE_MOVES.find((m) => m.value === formData.signatureMove)?.label}
+                      <p className="text-white/80 text-sm mb-1 font-handwritten">
+                        Signature Move
+                      </p>
+                      <p className="text-white font-title">
+                        {
+                          SIGNATURE_MOVES.find(
+                            (m) => m.value === formData.signatureMove
+                          )?.emoji
+                        }{" "}
+                        {
+                          SIGNATURE_MOVES.find(
+                            (m) => m.value === formData.signatureMove
+                          )?.label
+                        }
                       </p>
                     </div>
 
                     <div className="bg-white/5 rounded-lg p-3 border border-white/10">
-                      <p className="text-white/80 text-sm mb-1">Intro</p>
-                      <p className="text-white font-display">{formData.introLine}</p>
+                      <p className="text-white/80 text-sm mb-1 font-handwritten">
+                        Intro
+                      </p>
+                      <p className="text-white font-title">
+                        {formData.introLine}
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -309,24 +403,36 @@ export default function ArrivalDockPage() {
             </motion.div>
           ) : (
             <div className="bg-white/10 backdrop-blur-md rounded-xl border border-white/20 shadow-xl overflow-hidden">
-              {/* Header */}
-              <div className="bg-gradient-to-r from-purple-500/80 to-pink-500/80 p-4 text-center border-b border-white/20">
-                <h1 className="font-title text-2xl text-white">
-                  {step === 1 && "Welcome to Paradise"}
-                  {step === 2 && "Design Your Look"}
-                  {step === 3 && "Shape Your Personality"}
-                  {step === 4 && "Final Touches"}
-                </h1>
-                <div className="flex justify-center gap-2 mt-2">
-                  {[1, 2, 3, 4].map((i) => (
-                    <div
-                      key={i}
-                      className={cn(
-                        "w-2 h-2 rounded-full transition-all duration-300",
-                        step === i ? "bg-white scale-125" : step > i ? "bg-white/80" : "bg-white/30",
-                      )}
-                    />
-                  ))}
+              {/* Header - Sleeker Design */}
+              <div className="bg-gradient-to-r from-purple-600/90 to-pink-600/90 p-5 border-b border-white/20">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    {step === 1 && <Heart className="w-6 h-6 text-white" />}
+                    {step === 2 && <Wand2 className="w-6 h-6 text-white" />}
+                    {step === 3 && <Sparkles className="w-6 h-6 text-white" />}
+                    {step === 4 && <Heart className="w-6 h-6 text-white" />}
+                    <h1 className="font-title text-2xl text-white drop-shadow-sm">
+                      {step === 1 && "Welcome to Paradise"}
+                      {step === 2 && "Design Your Look"}
+                      {step === 3 && "Shape Your Personality"}
+                      {step === 4 && "Final Touches"}
+                    </h1>
+                  </div>
+                  <div className="flex gap-1.5">
+                    {[1, 2, 3, 4].map((i) => (
+                      <div
+                        key={i}
+                        className={cn(
+                          "h-2 w-8 rounded-full transition-all duration-300",
+                          step === i
+                            ? "bg-white shadow-glow"
+                            : step > i
+                              ? "bg-white/60"
+                              : "bg-white/20"
+                        )}
+                      />
+                    ))}
+                  </div>
                 </div>
               </div>
 
@@ -334,41 +440,34 @@ export default function ArrivalDockPage() {
               <div className="grid grid-cols-[40%_60%]">
                 {/* Left Side - Avatar Preview */}
                 <div className="p-4 border-r border-white/10">
-                  <div className="aspect-square rounded-xl overflow-hidden border-2 border-white/20 relative mb-3">
+                  <div className="aspect-square rounded-xl overflow-hidden border-2 border-white/20 relative mb-3 bg-gradient-to-b from-purple-500/20 to-pink-500/20">
                     {avatarUrl ? (
-                      <Image src={avatarUrl} alt="Generated avatar" width={400} height={400} className="object-cover" />
+                      <Image
+                        src={avatarUrl || "/placeholder.svg"}
+                        alt="Generated avatar"
+                        width={400}
+                        height={400}
+                        className="object-cover"
+                      />
                     ) : (
-                      <>
-                        {/* <Image
-                          src="/placeholder.svg?height=400&width=400"
-                          alt="Avatar preview"
-                          width={400}
-                          height={400}
-                          className="object-cover"
-                        /> */}
-                        <div className="absolute inset-0 flex items-center justify-center">
-                          <div className="text-center">
-                            <Wand2 className="w-12 h-12 text-white/50 mx-auto mb-2" />
-                            <p className="text-white/70 font-display text-sm">
-                              {submissionStatus === "generating" ? "Generating your avatar..." : "Customizing..."}
-                            </p>
-                          </div>
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <div className="text-center">
+                          <Wand2 className="w-12 h-12 text-white/50 mx-auto mb-2" />
+                          <p className="text-white/70 font-title text-sm">
+                            {submissionStatus === "generating"
+                              ? "Generating your avatar..."
+                              : "Customizing..."}
+                          </p>
                         </div>
-                      </>
+                      </div>
                     )}
                   </div>
 
                   {formData.name && (
                     <div className="text-center -mt-1">
-                      <h3 className="font-display text-2xl text-white mb-2">{formData.name}</h3>
-                      {formData.personalityVibe && (
-                        <div className="bg-white/10 backdrop-blur-sm rounded-lg border border-white/20 py-2 px-3">
-                          <p className="font-display text-lg text-white font-bold">
-                            {PERSONALITY_VIBES.find((v) => v.value === formData.personalityVibe)?.emoji}
-                            {PERSONALITY_VIBES.find((v) => v.value === formData.personalityVibe)?.label}
-                          </p>
-                        </div>
-                      )}
+                      <h3 className="font-title text-2xl text-white mb-2">
+                        {formData.name}
+                      </h3>
                     </div>
                   )}
                 </div>
@@ -385,46 +484,75 @@ export default function ArrivalDockPage() {
                       >
                         <div className="space-y-3">
                           <div className="space-y-1">
-                            <Label className="text-white text-sm">Your Name</Label>
+                            <Label className="text-white text-sm font-title">
+                              Your Name
+                            </Label>
                             <Input
                               placeholder="What should we call you?"
                               value={formData.name}
-                              onChange={(e) => updateFormData("name", e.target.value)}
-                              className="bg-white/10 border-white/20 text-white placeholder:text-white/50 h-8 text-sm"
+                              onChange={(e) =>
+                                updateFormData("name", e.target.value)
+                              }
+                              className="bg-white border-white/20 text-gray-800 placeholder:text-gray-500 h-10 text-sm font-title"
                             />
                           </div>
 
                           <div className="space-y-1">
-                            <Label className="text-white text-sm">Gender</Label>
-                            <Select value={formData.gender} onValueChange={(value) => updateFormData("gender", value)}>
-                              <SelectTrigger className="bg-white/10 border-white/20 text-white h-8 text-sm">
+                            <Label className="text-white text-sm font-title">
+                              Gender
+                            </Label>
+                            <Select
+                              value={formData.gender}
+                              onValueChange={(value) =>
+                                updateFormData("gender", value)
+                              }
+                            >
+                              <SelectTrigger className="bg-white border-white/20 text-gray-800 h-10 text-sm font-title">
                                 <SelectValue placeholder="Select your gender" />
                               </SelectTrigger>
-                              <SelectContent>
+                              <SelectContent className="bg-white text-gray-800 font-title">
                                 <SelectItem value="male">Male</SelectItem>
                                 <SelectItem value="female">Female</SelectItem>
-                                <SelectItem value="non-binary">Non-binary</SelectItem>
+                                <SelectItem value="non-binary">
+                                  Non-binary
+                                </SelectItem>
                               </SelectContent>
                             </Select>
                           </div>
 
                           <div className="space-y-1">
-                            <Label className="text-white text-sm">Initial Vibe</Label>
+                            <Label className="text-white text-sm font-title">
+                              Initial Vibe
+                            </Label>
                             <div className="grid grid-cols-2 gap-2">
                               {PERSONALITY_VIBES.map((vibe) => (
                                 <button
                                   key={vibe.value}
-                                  onClick={() => updateFormData("personalityVibe", vibe.value)}
+                                  onClick={() =>
+                                    updateFormData(
+                                      "personalityVibe",
+                                      vibe.value
+                                    )
+                                  }
                                   className={cn(
                                     "p-2 rounded-lg border-2 text-sm transition-all duration-200",
                                     "flex items-center gap-2",
                                     formData.personalityVibe === vibe.value
-                                      ? "bg-gradient-to-r from-pink-500/20 to-purple-500/20 border-white scale-105 shadow-[0_0_10px_rgba(255,255,255,0.2)]"
-                                      : "bg-white/5 border-white/20 hover:bg-white/10 hover:border-white/40",
+                                      ? "bg-gradient-to-r from-pink-500 to-purple-500 border-white scale-105 shadow-[0_0_10px_rgba(255,255,255,0.2)]"
+                                      : "bg-white border-white/20 hover:bg-white/90 hover:border-white/40"
                                   )}
                                 >
                                   <span>{vibe.emoji}</span>
-                                  <span className="text-white text-xs font-display">{vibe.label}</span>
+                                  <span
+                                    className={cn(
+                                      "text-xs font-title",
+                                      formData.personalityVibe === vibe.value
+                                        ? "text-white"
+                                        : "text-gray-800"
+                                    )}
+                                  >
+                                    {vibe.label}
+                                  </span>
                                 </button>
                               ))}
                             </div>
@@ -442,17 +570,24 @@ export default function ArrivalDockPage() {
                       >
                         <div className="grid grid-cols-2 gap-3">
                           <div className="space-y-1">
-                            <Label className="text-white text-sm">Face Shape</Label>
+                            <Label className="text-white text-sm font-title">
+                              Face Shape
+                            </Label>
                             <Select
                               value={formData.appearance.faceShape}
-                              onValueChange={(value) => updateFormData("appearance.faceShape", value)}
+                              onValueChange={(value) =>
+                                updateFormData("appearance.faceShape", value)
+                              }
                             >
-                              <SelectTrigger className="bg-white/10 border-white/20 text-white h-8 text-sm">
+                              <SelectTrigger className="bg-white border-white/20 text-gray-800 h-10 text-sm font-title">
                                 <SelectValue placeholder="Select" />
                               </SelectTrigger>
-                              <SelectContent>
+                              <SelectContent className="bg-white text-gray-800 font-title">
                                 {FACE_SHAPES.map((shape) => (
-                                  <SelectItem key={shape} value={shape.toLowerCase()}>
+                                  <SelectItem
+                                    key={shape}
+                                    value={shape.toLowerCase()}
+                                  >
                                     {shape}
                                   </SelectItem>
                                 ))}
@@ -461,17 +596,24 @@ export default function ArrivalDockPage() {
                           </div>
 
                           <div className="space-y-1">
-                            <Label className="text-white text-sm">Skin Tone</Label>
+                            <Label className="text-white text-sm font-title">
+                              Skin Tone
+                            </Label>
                             <Select
                               value={formData.appearance.skinTone}
-                              onValueChange={(value) => updateFormData("appearance.skinTone", value)}
+                              onValueChange={(value) =>
+                                updateFormData("appearance.skinTone", value)
+                              }
                             >
-                              <SelectTrigger className="bg-white/10 border-white/20 text-white h-8 text-sm">
+                              <SelectTrigger className="bg-white border-white/20 text-gray-800 h-10 text-sm font-title">
                                 <SelectValue placeholder="Select" />
                               </SelectTrigger>
-                              <SelectContent>
+                              <SelectContent className="bg-white text-gray-800 font-title">
                                 {SKIN_TONES.map((tone) => (
-                                  <SelectItem key={tone} value={tone.toLowerCase()}>
+                                  <SelectItem
+                                    key={tone}
+                                    value={tone.toLowerCase()}
+                                  >
                                     {tone}
                                   </SelectItem>
                                 ))}
@@ -482,17 +624,24 @@ export default function ArrivalDockPage() {
 
                         <div className="grid grid-cols-2 gap-3">
                           <div className="space-y-1">
-                            <Label className="text-white text-sm">Hair Style</Label>
+                            <Label className="text-white text-sm font-title">
+                              Hair Style
+                            </Label>
                             <Select
                               value={formData.appearance.hairStyle}
-                              onValueChange={(value) => updateFormData("appearance.hairStyle", value)}
+                              onValueChange={(value) =>
+                                updateFormData("appearance.hairStyle", value)
+                              }
                             >
-                              <SelectTrigger className="bg-white/10 border-white/20 text-white h-8 text-sm">
+                              <SelectTrigger className="bg-white border-white/20 text-gray-800 h-10 text-sm font-title">
                                 <SelectValue placeholder="Select" />
                               </SelectTrigger>
-                              <SelectContent>
+                              <SelectContent className="bg-white text-gray-800 font-title">
                                 {HAIR_STYLES.map((style) => (
-                                  <SelectItem key={style} value={style.toLowerCase()}>
+                                  <SelectItem
+                                    key={style}
+                                    value={style.toLowerCase()}
+                                  >
                                     {style}
                                   </SelectItem>
                                 ))}
@@ -501,17 +650,24 @@ export default function ArrivalDockPage() {
                           </div>
 
                           <div className="space-y-1">
-                            <Label className="text-white text-sm">Hair Color</Label>
+                            <Label className="text-white text-sm font-title">
+                              Hair Color
+                            </Label>
                             <Select
                               value={formData.appearance.hairColor}
-                              onValueChange={(value) => updateFormData("appearance.hairColor", value)}
+                              onValueChange={(value) =>
+                                updateFormData("appearance.hairColor", value)
+                              }
                             >
-                              <SelectTrigger className="bg-white/10 border-white/20 text-white h-8 text-sm">
+                              <SelectTrigger className="bg-white border-white/20 text-gray-800 h-10 text-sm font-title">
                                 <SelectValue placeholder="Select" />
                               </SelectTrigger>
-                              <SelectContent>
+                              <SelectContent className="bg-white text-gray-800 font-title">
                                 {HAIR_COLORS.map((color) => (
-                                  <SelectItem key={color} value={color.toLowerCase()}>
+                                  <SelectItem
+                                    key={color}
+                                    value={color.toLowerCase()}
+                                  >
                                     {color}
                                   </SelectItem>
                                 ))}
@@ -521,20 +677,38 @@ export default function ArrivalDockPage() {
                         </div>
 
                         <div className="space-y-1">
-                          <Label className="text-white text-sm">Outfit Style</Label>
+                          <Label className="text-white text-sm font-title">
+                            Outfit Style
+                          </Label>
                           <div className="grid grid-cols-2 gap-2">
                             {OUTFIT_STYLES.map((style) => (
                               <button
                                 key={style}
-                                onClick={() => updateFormData("appearance.outfitStyle", style.toLowerCase())}
+                                onClick={() =>
+                                  updateFormData(
+                                    "appearance.outfitStyle",
+                                    style.toLowerCase()
+                                  )
+                                }
                                 className={cn(
                                   "p-2 rounded-lg border-2 text-sm transition-all duration-200",
-                                  formData.appearance.outfitStyle === style.toLowerCase()
-                                    ? "bg-gradient-to-r from-pink-500/20 to-purple-500/20 border-white scale-105 shadow-[0_0_10px_rgba(255,255,255,0.2)]"
-                                    : "bg-white/5 border-white/20 hover:bg-white/10 hover:border-white/40",
+                                  formData.appearance.outfitStyle ===
+                                    style.toLowerCase()
+                                    ? "bg-gradient-to-r from-pink-500 to-purple-500 border-white scale-105 shadow-[0_0_10px_rgba(255,255,255,0.2)]"
+                                    : "bg-white border-white/20 hover:bg-white/90 hover:border-white/40"
                                 )}
                               >
-                                <span className="text-white text-xs font-display">{style}</span>
+                                <span
+                                  className={cn(
+                                    "text-xs font-title",
+                                    formData.appearance.outfitStyle ===
+                                      style.toLowerCase()
+                                      ? "text-white"
+                                      : "text-gray-800"
+                                  )}
+                                >
+                                  {style}
+                                </span>
                               </button>
                             ))}
                           </div>
@@ -549,13 +723,17 @@ export default function ArrivalDockPage() {
                         exit={{ opacity: 0, x: -20 }}
                         className="space-y-4"
                       >
-                        <div className="bg-white/5 rounded-lg p-2 border border-white/10 text-sm">
+                        <div className="bg-white rounded-lg p-3 border border-white/10 text-sm">
                           <div className="flex justify-between items-center">
-                            <span className="text-white font-display">Points Left</span>
+                            <span className="text-gray-800 font-title">
+                              Points Left
+                            </span>
                             <span
                               className={cn(
-                                "font-display",
-                                remainingTraitPoints >= 0 ? "text-green-400" : "text-red-400",
+                                "font-title",
+                                remainingTraitPoints >= 0
+                                  ? "text-green-600"
+                                  : "text-red-600"
                               )}
                             >
                               {remainingTraitPoints}
@@ -564,30 +742,41 @@ export default function ArrivalDockPage() {
                         </div>
 
                         <div className="space-y-4">
-                          {Object.entries(formData.traits).map(([trait, value]) => (
-                            <div key={trait} className="space-y-1">
-                              <div className="flex justify-between text-sm">
-                                <Label className="text-white capitalize">{trait}</Label>
-                                <span className="text-white/70">{value}/10</span>
-                              </div>
-                              <Slider
-                                value={[value]}
-                                min={1}
-                                max={10}
-                                step={1}
-                                className="[&_[role=slider]]:bg-white"
-                                onValueChange={([newValue]) => {
-                                  const otherTraitsTotal = Object.entries(formData.traits)
-                                    .filter(([t]) => t !== trait)
-                                    .reduce((sum, [, v]) => sum + v, 0);
+                          {Object.entries(formData.traits).map(
+                            ([trait, value]) => (
+                              <div key={trait} className="space-y-1">
+                                <div className="flex justify-between text-sm">
+                                  <Label className="text-white capitalize font-title">
+                                    {trait}
+                                  </Label>
+                                  <span className="text-white/70 font-title">
+                                    {value}/10
+                                  </span>
+                                </div>
+                                <Slider
+                                  value={[value]}
+                                  min={1}
+                                  max={10}
+                                  step={1}
+                                  className="[&_[role=slider]]:bg-white"
+                                  onValueChange={([newValue]) => {
+                                    const otherTraitsTotal = Object.entries(
+                                      formData.traits
+                                    )
+                                      .filter(([t]) => t !== trait)
+                                      .reduce((sum, [, v]) => sum + v, 0);
 
-                                  if (otherTraitsTotal + newValue <= 25) {
-                                    updateFormData(`traits.${trait}`, newValue);
-                                  }
-                                }}
-                              />
-                            </div>
-                          ))}
+                                    if (otherTraitsTotal + newValue <= 25) {
+                                      updateFormData(
+                                        `traits.${trait}`,
+                                        newValue
+                                      );
+                                    }
+                                  }}
+                                />
+                              </div>
+                            )
+                          )}
                         </div>
                       </motion.div>
                     )}
@@ -601,42 +790,68 @@ export default function ArrivalDockPage() {
                       >
                         <div className="space-y-3">
                           <div className="space-y-1">
-                            <Label className="text-white text-sm">Signature Move</Label>
+                            <Label className="text-white text-sm font-title">
+                              Signature Move
+                            </Label>
                             <div className="grid grid-cols-2 gap-2">
                               {SIGNATURE_MOVES.map((move) => (
                                 <button
                                   key={move.value}
-                                  onClick={() => updateFormData("signatureMove", move.value)}
+                                  onClick={() =>
+                                    updateFormData("signatureMove", move.value)
+                                  }
                                   className={cn(
                                     "p-2 rounded-lg border-2 text-sm transition-all duration-200",
                                     "flex items-center gap-2",
                                     formData.signatureMove === move.value
-                                      ? "bg-gradient-to-r from-pink-500/20 to-purple-500/20 border-white scale-105 shadow-[0_0_10px_rgba(255,255,255,0.2)]"
-                                      : "bg-white/5 border-white/20 hover:bg-white/10 hover:border-white/40",
+                                      ? "bg-gradient-to-r from-pink-500 to-purple-500 border-white scale-105 shadow-[0_0_10px_rgba(255,255,255,0.2)]"
+                                      : "bg-white border-white/20 hover:bg-white/90 hover:border-white/40"
                                   )}
                                 >
                                   <span>{move.emoji}</span>
-                                  <span className="text-white text-xs font-display">{move.label}</span>
+                                  <span
+                                    className={cn(
+                                      "text-xs font-title",
+                                      formData.signatureMove === move.value
+                                        ? "text-white"
+                                        : "text-gray-800"
+                                    )}
+                                  >
+                                    {move.label}
+                                  </span>
                                 </button>
                               ))}
                             </div>
                           </div>
 
                           <div className="space-y-1">
-                            <Label className="text-white text-sm">Your Intro Line</Label>
+                            <Label className="text-white text-sm font-title">
+                              Your Intro Line
+                            </Label>
                             <div className="space-y-2">
                               {INTRO_LINES.map((line, index) => (
                                 <button
                                   key={index}
-                                  onClick={() => updateFormData("introLine", line)}
+                                  onClick={() =>
+                                    updateFormData("introLine", line)
+                                  }
                                   className={cn(
                                     "w-full p-2 rounded-lg border-2 text-left text-sm transition-all duration-200",
                                     formData.introLine === line
-                                      ? "bg-gradient-to-r from-pink-500/20 to-purple-500/20 border-white scale-105 shadow-[0_0_10px_rgba(255,255,255,0.2)]"
-                                      : "bg-white/5 border-white/20 hover:bg-white/10 hover:border-white/40",
+                                      ? "bg-gradient-to-r from-pink-500 to-purple-500 border-white scale-105 shadow-[0_0_10px_rgba(255,255,255,0.2)]"
+                                      : "bg-white border-white/20 hover:bg-white/90 hover:border-white/40"
                                   )}
                                 >
-                                  <span className="text-white text-xs font-display">{line}</span>
+                                  <span
+                                    className={cn(
+                                      "text-xs font-title",
+                                      formData.introLine === line
+                                        ? "text-white"
+                                        : "text-gray-800"
+                                    )}
+                                  >
+                                    {line}
+                                  </span>
                                 </button>
                               ))}
                             </div>
@@ -650,7 +865,7 @@ export default function ArrivalDockPage() {
 
               {/* Error Message */}
               {generationError && (
-                <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-red-500/90 text-white px-4 py-2 rounded-lg">
+                <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-red-500/90 text-white px-4 py-2 rounded-lg font-title">
                   {generationError}
                 </div>
               )}
@@ -660,7 +875,7 @@ export default function ArrivalDockPage() {
                 <Button
                   variant="outline"
                   onClick={handleBack}
-                  className="bg-white/10 border-white/20 text-white hover:bg-white/20"
+                  className="bg-white border-white/20 text-gray-800 hover:bg-white/90 font-title"
                 >
                   <ArrowLeft className="w-4 h-4 mr-2" />
                   Back
@@ -669,17 +884,28 @@ export default function ArrivalDockPage() {
                 {step < 4 ? (
                   <Button
                     onClick={handleNext}
-                    className="bg-gradient-to-r from-pink-500 to-purple-500 text-white border-2 border-white/20
-                             hover:from-pink-600 hover:to-purple-600"
+                    disabled={!isCurrentStepValid()}
+                    className={cn(
+                      "font-title transition-all duration-300",
+                      isCurrentStepValid()
+                        ? "bg-pink-500 text-white hover:bg-pink-600 border-2 border-white/30"
+                        : "bg-white/10 text-white/50 border border-white/10 backdrop-blur-sm"
+                    )}
                   >
-                    Next Step
+                    {isCurrentStepValid() ? "Next Step" : "Complete This Step"}
                   </Button>
                 ) : (
                   <Button
                     onClick={handleSubmit}
-                    disabled={submissionStatus !== "idle"}
-                    className="bg-gradient-to-r from-pink-500 to-purple-500 text-white border-2 border-white/20
-                             hover:from-pink-600 hover:to-purple-600 disabled:opacity-50"
+                    disabled={
+                      submissionStatus !== "idle" || !isCurrentStepValid()
+                    }
+                    className={cn(
+                      "font-title transition-all duration-300",
+                      isCurrentStepValid() && submissionStatus === "idle"
+                        ? "bg-pink-500 text-white hover:bg-pink-600 border-2 border-white/30"
+                        : "bg-white/10 text-white/50 border border-white/10 backdrop-blur-sm"
+                    )}
                   >
                     <Heart className="w-4 h-4 mr-2" />
                     Create Islander
@@ -694,20 +920,29 @@ export default function ArrivalDockPage() {
 
       {/* Loading Overlay - Only show for generating and creating states */}
       <AnimatePresence>
-        {(submissionStatus === "generating" || submissionStatus === "creating") && (
+        {(submissionStatus === "generating" ||
+          submissionStatus === "creating") && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50"
           >
-            <motion.div initial={{ scale: 0.8 }} animate={{ scale: 1 }} className="text-center">
+            <motion.div
+              initial={{ scale: 0.8 }}
+              animate={{ scale: 1 }}
+              className="text-center"
+            >
               <div className="w-16 h-16 border-4 border-white border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-              <p className="font-display text-xl text-white">
-                {submissionStatus === "generating" ? "Generating Your Avatar..." : "Creating Your Islander..."}
+              <p className="font-title text-xl text-white">
+                {submissionStatus === "generating"
+                  ? "Generating Your Avatar..."
+                  : "Creating Your Islander..."}
               </p>
               <p className="font-handwritten text-lg text-white/80 mt-2">
-                {submissionStatus === "generating" ? "Creating your perfect look" : "Getting ready for paradise"}
+                {submissionStatus === "generating"
+                  ? "Creating your perfect look"
+                  : "Getting ready for paradise"}
               </p>
             </motion.div>
           </motion.div>
