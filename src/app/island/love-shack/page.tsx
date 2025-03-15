@@ -11,7 +11,7 @@ import {
   ArrowLeft,
   MessageCircle,
 } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 
@@ -235,7 +235,7 @@ export default function LoveShackPage() {
       {/* Background Image */}
       <div className="fixed inset-0 z-0">
         <Image
-          src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/love-shack-ty90xbv4S8DIiyFuN88gdckyLWTloN.png"
+          src="/places/love-shack.png"
           alt="Love Shack"
           fill
           className="object-cover"
@@ -267,10 +267,10 @@ export default function LoveShackPage() {
               </div>
               <div className="flex items-center gap-3">
                 <div className="bg-white/20 backdrop-blur-sm rounded-full px-3 py-1 flex items-center gap-1.5">
-                  <span className="text-white text-xs font-display">Time:</span>
+                  <span className="text-white text-xs font-title">Time:</span>
                   <span
                     className={cn(
-                      "text-white text-xs font-display",
+                      "text-white text-xs font-title",
                       timeLeft <= 10 && "text-red-200 animate-pulse"
                     )}
                   >
@@ -288,7 +288,7 @@ export default function LoveShackPage() {
                   )}
                 >
                   {renderIcon(VIBES[currentVibe].icon, "w-3 h-3 text-white")}
-                  <span className="text-white text-xs font-display">
+                  <span className="text-white text-xs font-title">
                     {VIBES[currentVibe].label}
                   </span>
                 </motion.div>
@@ -314,9 +314,7 @@ export default function LoveShackPage() {
                     <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 rounded-full border border-white" />
                   </div>
                   <div>
-                    <p className="font-display text-sm text-gray-800 font-medium">
-                      Sarah
-                    </p>
+                    <p className="font-title text-sm text-gray-800">Sarah</p>
                     <motion.p
                       key={sp1}
                       initial={{ scale: 1 }}
@@ -349,7 +347,7 @@ export default function LoveShackPage() {
                 {/* Islander 2 */}
                 <div className="flex items-center gap-3">
                   <div>
-                    <p className="font-display text-sm text-gray-800 font-medium text-right">
+                    <p className="font-title text-sm text-gray-800 text-right">
                       Mike
                     </p>
                     <motion.p
@@ -418,7 +416,7 @@ export default function LoveShackPage() {
                     >
                       <p
                         className={cn(
-                          "text-sm font-display",
+                          "text-sm font-title",
                           message.sender === "islander2"
                             ? "text-white"
                             : "text-gray-800"
@@ -510,7 +508,7 @@ export default function LoveShackPage() {
                           animate={{ scale: 1, opacity: 1 }}
                           transition={{ delay: 0.5 }}
                           className={cn(
-                            "absolute -bottom-2 left-1/2 -translate-x-1/2 px-2 py-0.5 rounded-full text-xs font-display",
+                            "absolute -bottom-2 left-1/2 -translate-x-1/2 px-2 py-0.5 rounded-full text-xs font-title",
                             winner === "islander1"
                               ? "bg-green-500 text-white"
                               : "bg-red-500 text-white"
@@ -519,9 +517,7 @@ export default function LoveShackPage() {
                           {winner === "islander1" ? "+100" : "-50"}
                         </motion.div>
                       </div>
-                      <p className="font-display text-sm text-gray-800">
-                        Sarah
-                      </p>
+                      <p className="font-title text-sm text-gray-800">Sarah</p>
                     </div>
 
                     {/* Result Indicator */}
@@ -556,7 +552,7 @@ export default function LoveShackPage() {
                           animate={{ scale: 1, opacity: 1 }}
                           transition={{ delay: 0.5 }}
                           className={cn(
-                            "absolute -bottom-2 left-1/2 -translate-x-1/2 px-2 py-0.5 rounded-full text-xs font-display",
+                            "absolute -bottom-2 left-1/2 -translate-x-1/2 px-2 py-0.5 rounded-full text-xs font-title",
                             winner === "islander2"
                               ? "bg-green-500 text-white"
                               : "bg-red-500 text-white"
@@ -565,13 +561,13 @@ export default function LoveShackPage() {
                           {winner === "islander2" ? "+100" : "-50"}
                         </motion.div>
                       </div>
-                      <p className="font-display text-sm text-gray-800">Mike</p>
+                      <p className="font-title text-sm text-gray-800">Mike</p>
                     </div>
                   </div>
 
                   <button
                     onClick={() => router.push("/island")}
-                    className="w-full bg-gradient-to-r from-pink-500 to-purple-500 text-white py-2 rounded-lg font-display text-sm shadow-sm hover:from-pink-600 hover:to-purple-600 transition-colors"
+                    className="w-full bg-gradient-to-r from-pink-500 to-purple-500 text-white py-2 rounded-lg font-title text-sm shadow-sm hover:from-pink-600 hover:to-purple-600 transition-colors"
                   >
                     Return to Island
                   </button>

@@ -377,7 +377,7 @@ export default function SunsetClubPage() {
                 >
                   <div className="p-4">
                     <div className="flex justify-between items-center mb-3">
-                      <h3 className="font-display text-sm text-gray-700">
+                      <h3 className="font-title text-sm text-gray-700">
                         Filter Islanders
                       </h3>
                       <button
@@ -542,7 +542,7 @@ export default function SunsetClubPage() {
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center justify-between">
                               <div className="flex items-center gap-1.5">
-                                <h3 className="font-display text-sm text-gray-800 font-medium">
+                                <h3 className="font-title text-sm text-gray-800">
                                   {profile.name}, {profile.age}
                                 </h3>
                                 <div className="flex items-center">
@@ -560,7 +560,7 @@ export default function SunsetClubPage() {
                             <div className="flex items-center gap-1.5 mt-0.5 mb-1">
                               <div
                                 className={cn(
-                                  "px-1.5 py-0.5 rounded-full text-[10px] font-display",
+                                  "px-1.5 py-0.5 rounded-full text-[10px] font-title",
                                   STATUS_STYLES[profile.status].bgColor,
                                   STATUS_STYLES[profile.status].color
                                 )}
@@ -571,7 +571,7 @@ export default function SunsetClubPage() {
                               </div>
                               <div
                                 className={cn(
-                                  "px-1.5 py-0.5 rounded-full text-[10px] font-display",
+                                  "px-1.5 py-0.5 rounded-full text-[10px] font-title",
                                   TYPE_STYLES[profile.type].bgColor,
                                   TYPE_STYLES[profile.type].color
                                 )}
@@ -634,7 +634,7 @@ export default function SunsetClubPage() {
                                     }
                                     size="sm"
                                     className={cn(
-                                      "h-6 text-xs text-white border-0 shadow-sm px-2 font-display",
+                                      "h-6 text-xs text-white border-0 shadow-sm px-2 font-title",
                                       "transition-all duration-200",
                                       profile.status === "coupled"
                                         ? "bg-gray-300 cursor-not-allowed"
@@ -663,7 +663,7 @@ export default function SunsetClubPage() {
                                     }
                                     size="sm"
                                     className={cn(
-                                      "h-6 text-xs text-white border-0 shadow-sm px-2 font-display",
+                                      "h-6 text-xs text-white border-0 shadow-sm px-2 font-title",
                                       "transition-all duration-200",
                                       profile.status === "coupled"
                                         ? "bg-gray-300 cursor-not-allowed"
