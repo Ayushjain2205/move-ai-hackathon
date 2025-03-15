@@ -80,6 +80,7 @@ export default function ArrivalDockPage() {
   const [step, setStep] = useState(1);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [generationError, setGenerationError] = useState<string | null>(null);
+  const [isGeneratingAvatar, setIsGeneratingAvatar] = useState(false);
   const [formData, setFormData] = useState<IslanderFormData>({
     name: "",
     gender: "",
@@ -177,10 +178,49 @@ export default function ArrivalDockPage() {
     });
   };
 
-  const handleNext = () => {
-    if (isCurrentStepValid()) {
-      setStep((prev) => prev + 1);
+  const generateAvatar = async () => {
+    setIsGeneratingAvatar(true);
+    setGenerationError(null);
+
+    try {
+      const response = await fetch("/api/generate-avatar", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to generate avatar");
+      }
+
+      const result = await response.json();
+
+      if (result.error) {
+        throw new Error(result.error);
+      }
+
+      if (result.status === "failed") {
+        throw new Error("Avatar generation failed");
+      }
+
+      const imageUrl = result.output[0];
+      setAvatarUrl(imageUrl);
+    } catch (error) {
+      console.error("Error generating avatar:", error);
+      setGenerationError("Failed to generate your avatar. Please try again.");
+    } finally {
+      setIsGeneratingAvatar(false);
     }
+  };
+
+  const handleNext = async () => {
+    if (step === 2) {
+      // Generate avatar after appearance is set
+      generateAvatar();
+    }
+    setStep(step + 1);
   };
 
   const handleBack = () => {
@@ -500,7 +540,7 @@ export default function ArrivalDockPage() {
                   <div className="aspect-square rounded-xl overflow-hidden border-2 border-white/20 relative mb-3 bg-gradient-to-b from-purple-500/20 to-pink-500/20">
                     {avatarUrl ? (
                       <Image
-                        src={avatarUrl || "/placeholder.svg"}
+                        src={avatarUrl}
                         alt="Generated avatar"
                         width={400}
                         height={400}
@@ -511,9 +551,7 @@ export default function ArrivalDockPage() {
                         <div className="text-center">
                           <Wand2 className="w-12 h-12 text-white/50 mx-auto mb-2" />
                           <p className="text-white/70 font-title text-sm">
-                            {submissionStatus === "generating"
-                              ? "Generating your avatar..."
-                              : "Customizing..."}
+                            {isGeneratingAvatar ? "Customizing..." : "Preview"}
                           </p>
                         </div>
                       </div>
