@@ -277,11 +277,11 @@ export default function LoveShackPage() {
       {/* Back Button */}
       <button
         onClick={() => router.push("/island")}
-        className="fixed top-4 left-4 z-20 bg-white rounded-full p-2 
-                border-2 border-pink-200 shadow-lg hover:bg-pink-50 transition-all duration-200
+        className="fixed top-4 left-4 z-20 bg-white/20 backdrop-blur-sm rounded-full p-2 
+                border border-white/30 shadow-lg hover:bg-white/30 transition-all duration-200
                 hover:scale-105 transform"
       >
-        <ArrowLeft className="w-6 h-6 text-pink-500" />
+        <ArrowLeft className="w-6 h-6 text-white" />
       </button>
 
       {/* Main Content */}
