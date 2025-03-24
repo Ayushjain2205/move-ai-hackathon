@@ -26,6 +26,7 @@ import {
   PartyPopper,
 } from "lucide-react";
 import { useImageLoading } from "@/hooks/useImageLoading";
+import { useWallet } from "@aptos-labs/wallet-adapter-react";
 
 interface IslanderFormData {
   name: string;
@@ -77,6 +78,7 @@ const INTRO_LINES = [
 
 export default function ArrivalDockPage() {
   const router = useRouter();
+  const { account } = useWallet();
   const [step, setStep] = useState(1);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [generationError, setGenerationError] = useState<string | null>(null);
@@ -232,6 +234,11 @@ export default function ArrivalDockPage() {
   };
 
   const handleSubmit = async () => {
+    if (!account?.address) {
+      setGenerationError("Please connect your wallet first");
+      return;
+    }
+
     setSubmissionStatus("generating");
     setGenerationError(null);
 
@@ -263,14 +270,33 @@ export default function ArrivalDockPage() {
       const imageUrl = result.output[0];
       setAvatarUrl(imageUrl);
 
+      // Store the Islander data in Supabase
+      const createResponse = await fetch("/api/create-islander", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          formData: {
+            ...formData,
+            avatarUrl: imageUrl,
+          },
+          walletAddress: account.address,
+        }),
+      });
+
+      if (!createResponse.ok) {
+        throw new Error("Failed to create islander");
+      }
+
       // Show creating state briefly then success
       setSubmissionStatus("creating");
       setTimeout(() => {
         setSubmissionStatus("success");
       }, 2000);
     } catch (error) {
-      console.error("Error generating avatar:", error);
-      setGenerationError("Failed to generate your avatar. Please try again.");
+      console.error("Error:", error);
+      setGenerationError("Failed to create your islander. Please try again.");
       setSubmissionStatus("idle");
     }
   };
