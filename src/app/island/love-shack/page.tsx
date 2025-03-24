@@ -3,21 +3,10 @@
 import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { useWallet } from "@aptos-labs/wallet-adapter-react";
-import {
-  ArrowLeft,
-  Heart,
-  Sparkles,
-  Star,
-  Trophy,
-  Search,
-  X,
-  MessageCircle,
-  ThumbsUp,
-  ThumbsDown,
-} from "lucide-react";
+import { ArrowLeft, Heart, Star, Search, X } from "lucide-react";
 
 interface Islander {
   id: string;
