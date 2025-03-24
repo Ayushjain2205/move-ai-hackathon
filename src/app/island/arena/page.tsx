@@ -40,7 +40,7 @@ interface QuestionResult {
 export default function ArenaPage() {
   const router = useRouter();
   const { account } = useWallet();
-  const { imageLoaded, handleImageLoad } = useImageLoading("/places/arena.png");
+  const { handleImageLoad } = useImageLoading("/places/arena.png");
   const [userAgent, setUserAgent] = useState<Agent | null>(null);
   const [opponentAgent, setOpponentAgent] = useState<Agent | null>(null);
   const [battleState, setBattleState] = useState<BattleState>("setup");
@@ -53,7 +53,6 @@ export default function ArenaPage() {
   const [finalWinner, setFinalWinner] = useState<"user" | "opponent" | null>(
     null
   );
-  const [isProcessing, setIsProcessing] = useState(false);
 
   // Fetch user's agent
   useEffect(() => {
@@ -113,8 +112,6 @@ export default function ArenaPage() {
     if (currentQuestionIndex >= 5 || battleState === "result") {
       return;
     }
-
-    setIsProcessing(true);
 
     try {
       // Generate question
@@ -224,8 +221,6 @@ export default function ArenaPage() {
       }
     } catch (error) {
       console.error("Error processing question:", error);
-    } finally {
-      setIsProcessing(false);
     }
   };
 
@@ -237,7 +232,6 @@ export default function ArenaPage() {
     setQuestionResults([]);
     setFinalWinner(null);
     setCurrentQuestionIndex(0);
-    setIsProcessing(false);
     await processQuestion();
   };
 
