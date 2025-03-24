@@ -26,29 +26,9 @@ const llm = new ChatAnthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
 });
 
-const textDecoder = new TextDecoder();
-
-// Function to read and process the stream
-async function readStream(stream: any) {
-  try {
-    const reader = stream.getReader();
-    let result = "";
-
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      result += textDecoder.decode(value, { stream: true });
-    }
-
-    result += textDecoder.decode();
-    return result;
-  } catch (error) {
-    console.error("Error reading stream:", error);
-    throw error;
-  }
-}
-
-const convertVercelMessageToLangChainMessage = (message: VercelChatMessage) => {
+const convertVercelMessageToLangChainMessage = (
+  message: VercelChatMessage
+): BaseMessage => {
   if (message.role === "user") {
     return new HumanMessage(message.content);
   } else if (message.role === "assistant") {
@@ -58,17 +38,31 @@ const convertVercelMessageToLangChainMessage = (message: VercelChatMessage) => {
   }
 };
 
-const convertLangChainMessageToVercelMessage = (message: BaseMessage) => {
+const convertLangChainMessageToVercelMessage = (
+  message: BaseMessage
+): VercelChatMessage => {
+  const content =
+    typeof message.content === "string"
+      ? message.content
+      : Array.isArray(message.content)
+        ? message.content.map((c) => (typeof c === "string" ? c : "")).join("")
+        : "";
+
+  const baseMessage = {
+    id: Math.random().toString(36).substring(7),
+    content,
+  };
+
   if (message._getType() === "human") {
-    return { content: message.content, role: "user" };
+    return { ...baseMessage, role: "user" };
   } else if (message._getType() === "ai") {
     return {
-      content: message.content,
+      ...baseMessage,
       role: "assistant",
       tool_calls: (message as AIMessage).tool_calls,
-    };
+    } as VercelChatMessage;
   } else {
-    return { content: message.content, role: message._getType() };
+    return { ...baseMessage, role: "system" };
   }
 };
 
@@ -120,6 +114,9 @@ export async function POST(request: Request) {
         PrivateKey.formatPrivateKey(privateKeyStr, PrivateKeyVariants.Ed25519)
       ),
     });
+
+    // Log account address for debugging
+    console.log("Agent account:", account);
 
     const signer = new LocalSigner(account, Network.MAINNET);
     const aptosAgent = new AgentRuntime(signer, aptos, {
@@ -185,7 +182,7 @@ export async function POST(request: Request) {
 
     if (!showIntermediateSteps) {
       const eventStream = await agent.streamEvents(
-        { messages },
+        { messages: messages.map(convertVercelMessageToLangChainMessage) },
         {
           version: "v2",
           configurable: {
@@ -218,7 +215,9 @@ export async function POST(request: Request) {
 
       return new Response(transformStream);
     } else {
-      const result = await agent.invoke({ messages });
+      const result = await agent.invoke({
+        messages: messages.map(convertVercelMessageToLangChainMessage),
+      });
 
       return NextResponse.json(
         {
