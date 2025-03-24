@@ -23,6 +23,7 @@ import {
   Filter,
   Check,
 } from "lucide-react";
+import { useWallet } from "@aptos-labs/wallet-adapter-react";
 
 interface Skill {
   name: string;
@@ -47,6 +48,14 @@ interface ActiveTraining {
   packId: string;
   endTime: number;
   targetSkill: string;
+}
+
+interface Islander {
+  id: string;
+  name: string;
+  avatar_url: string;
+  level: number;
+  score: number;
 }
 
 const SKILLS: Skill[] = [
@@ -292,6 +301,8 @@ const CircularProgress = ({
 
 export default function RetreatPage() {
   const router = useRouter();
+  const { account } = useWallet();
+  const [currentIslander, setCurrentIslander] = useState<Islander | null>(null);
   const [activeTraining, setActiveTraining] = useState<ActiveTraining | null>(
     null
   );
@@ -299,6 +310,28 @@ export default function RetreatPage() {
   const [heartBalance] = useState(2450);
   const [skillFilter, setSkillFilter] = useState<string | null>(null);
   const [selectedTraining, setSelectedTraining] = useState<string | null>(null);
+
+  // Fetch current islander data
+  useEffect(() => {
+    const fetchIslander = async () => {
+      if (!account?.address) return;
+
+      try {
+        const response = await fetch(
+          `/api/get-islander?walletAddress=${account.address}`
+        );
+        if (!response.ok) {
+          throw new Error("Failed to fetch islander data");
+        }
+        const data = await response.json();
+        setCurrentIslander(data);
+      } catch (error) {
+        console.error("Error fetching islander:", error);
+      }
+    };
+
+    fetchIslander();
+  }, [account?.address]);
 
   // Simulate active training countdown
   useEffect(() => {
@@ -377,327 +410,366 @@ export default function RetreatPage() {
       {/* Main Content */}
       <div className="relative z-10 min-h-screen flex items-center justify-center p-4">
         <div className="w-full max-w-5xl">
-          <div className="bg-white/20 backdrop-blur-md rounded-xl border border-white/30 shadow-xl overflow-hidden">
-            {/* Header */}
-            <div className="bg-gradient-to-r from-pink-500/90 to-purple-500/90 backdrop-blur-md p-3 flex items-center justify-between border-b border-white/30">
-              <div className="flex items-center gap-2">
-                <User className="w-5 h-5 text-white" />
-                <h1 className="font-title text-xl text-white">The Retreat</h1>
-              </div>
-              <div className="bg-white/30 backdrop-blur-sm rounded-full px-3 py-1 flex items-center gap-1.5 border border-white/40">
-                <Heart className="w-4 h-4 text-pink-200" />
-                <span className="font-title text-white text-base">
-                  {heartBalance}
-                </span>
-              </div>
-            </div>
-
-            {/* Main Content - Left/Right Split */}
-            <div className="flex flex-row">
-              {/* Left Side - Islander Profile & Skills */}
-              <div className="w-1/3 bg-white/40 backdrop-blur-md border-r border-white/30">
-                {/* Islander Image & Details */}
-                <div className="p-4 text-center">
-                  <div className="w-40 h-40 rounded-full overflow-hidden border-2 border-white/70 relative mx-auto shadow-lg">
-                    <Image
-                      src="/placeholder.svg?height=160&width=160"
-                      alt="Islander avatar"
-                      fill
-                      className="object-cover"
-                    />
-                  </div>
-
-                  <h2 className="font-title text-xl text-gray-800 mt-3">
-                    Sarah
-                  </h2>
-
-                  <div className="flex items-center justify-center gap-2 mt-1">
-                    <div className="bg-purple-100/50 backdrop-blur-sm rounded-full px-2 py-1 flex items-center gap-1 border border-purple-200/50">
-                      <Star className="w-3 h-3 text-purple-500" />
-                      <span className="font-title text-purple-700 text-xs">
-                        Level 5
-                      </span>
-                    </div>
-
-                    <div className="bg-amber-100/50 backdrop-blur-sm rounded-full px-2 py-1 flex items-center gap-1 border border-amber-200/50">
-                      <Trophy className="w-3 h-3 text-amber-500" />
-                      <span className="font-title text-amber-700 text-xs">
-                        2,450 XP
-                      </span>
+          {!currentIslander ? (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="bg-white/20 backdrop-blur-md rounded-xl border border-white/30 shadow-xl overflow-hidden"
+            >
+              <div className="p-8 text-center">
+                <div className="w-32 h-32 rounded-full bg-gradient-to-br from-pink-500/20 to-purple-500/20 border-4 border-white/70 relative mx-auto shadow-lg mb-6 flex items-center justify-center">
+                  <div className="relative">
+                    <div className="absolute inset-0 bg-gradient-to-br from-pink-500/30 to-purple-500/30 rounded-full blur-xl animate-pulse" />
+                    <div className="relative bg-white/90 backdrop-blur-sm rounded-full p-6 shadow-lg">
+                      <div className="flex items-center justify-center gap-2">
+                        <User className="w-8 h-8 text-pink-500" />
+                        <Sparkles className="w-6 h-6 text-purple-500" />
+                      </div>
                     </div>
                   </div>
+                </div>
+                <h2 className="font-title text-2xl text-white mb-4">
+                  Create Your Islander
+                </h2>
+                <p className="font-display text-white/80 mb-8">
+                  Before you can access the retreat, you need to create your
+                  islander first. Head to the Arrival Dock to get started!
+                </p>
+                <button
+                  onClick={() => router.push("/island/arrival-dock")}
+                  className="bg-pink-500 hover:bg-pink-600 text-white font-title text-lg px-8 py-3 rounded-xl transition-colors flex items-center gap-2 mx-auto"
+                >
+                  <User className="w-5 h-5" />
+                  Create Your Islander
+                </button>
+              </div>
+            </motion.div>
+          ) : (
+            <div className="bg-white/20 backdrop-blur-md rounded-xl border border-white/30 shadow-xl overflow-hidden">
+              {/* Header */}
+              <div className="bg-gradient-to-r from-pink-500/90 to-purple-500/90 backdrop-blur-md p-3 flex items-center justify-between border-b border-white/30">
+                <div className="flex items-center gap-2">
+                  <User className="w-5 h-5 text-white" />
+                  <h1 className="font-title text-xl text-white">The Retreat</h1>
+                </div>
+                <div className="bg-white/30 backdrop-blur-sm rounded-full px-3 py-1 flex items-center gap-1.5 border border-white/40">
+                  <Heart className="w-4 h-4 text-pink-200" />
+                  <span className="font-title text-white text-base">
+                    {heartBalance}
+                  </span>
+                </div>
+              </div>
 
-                  {activeTraining && (
-                    <div className="mt-2 bg-green-100/50 backdrop-blur-sm rounded-lg p-2 border border-green-200/50">
-                      <div className="flex items-center justify-center gap-1">
-                        <Timer className="w-3 h-3 text-green-500 animate-pulse" />
-                        <span className="text-green-700 text-xs font-title">
-                          Training: {formatTime(timeLeft || 0)}
+              {/* Main Content - Left/Right Split */}
+              <div className="flex flex-row">
+                {/* Left Side - Islander Profile & Skills */}
+                <div className="w-1/3 bg-white/40 backdrop-blur-md border-r border-white/30">
+                  {/* Islander Image & Details */}
+                  <div className="p-4 text-center">
+                    <div className="w-40 h-40 rounded-full overflow-hidden border-2 border-white/70 relative mx-auto shadow-lg">
+                      <Image
+                        src={
+                          currentIslander.avatar_url ||
+                          "/placeholder.svg?height=160&width=160"
+                        }
+                        alt={`${currentIslander.name}'s avatar`}
+                        fill
+                        className="object-cover"
+                      />
+                    </div>
+
+                    <h2 className="font-title text-xl text-gray-800 mt-3">
+                      {currentIslander.name}
+                    </h2>
+
+                    <div className="flex items-center justify-center gap-2 mt-1">
+                      <div className="bg-purple-100/50 backdrop-blur-sm rounded-full px-2 py-1 flex items-center gap-1 border border-purple-200/50">
+                        <Star className="w-3 h-3 text-purple-500" />
+                        <span className="font-title text-purple-700 text-xs">
+                          Level {currentIslander.level}
+                        </span>
+                      </div>
+
+                      <div className="bg-amber-100/50 backdrop-blur-sm rounded-full px-2 py-1 flex items-center gap-1 border border-amber-200/50">
+                        <Trophy className="w-3 h-3 text-amber-500" />
+                        <span className="font-title text-amber-700 text-xs">
+                          {currentIslander.score} XP
                         </span>
                       </div>
                     </div>
-                  )}
-                </div>
 
-                {/* Skills Section */}
-                <div className="px-4 pb-4">
-                  <div className="flex items-center justify-between mb-3">
-                    <h2 className="font-title text-sm text-gray-800 flex items-center gap-1.5">
-                      <Trophy className="w-3.5 h-3.5 text-gray-700" />
-                      Skills
-                    </h2>
-                  </div>
-
-                  <div className="space-y-3">
-                    {SKILLS.map((skill) => (
-                      <div
-                        key={skill.name}
-                        className={cn(
-                          "flex items-center gap-3 p-2 rounded-lg transition-colors cursor-pointer",
-                          skillFilter === skill.name
-                            ? "bg-purple-100/40 backdrop-blur-sm border border-purple-200/40"
-                            : "bg-white/30 backdrop-blur-sm border border-white/20 hover:bg-white/40"
-                        )}
-                        onClick={() =>
-                          setSkillFilter(
-                            skillFilter === skill.name ? null : skill.name
-                          )
-                        }
-                        role="button"
-                      >
-                        <CircularProgress
-                          progress={skill.progress}
-                          color={skill.color}
-                          icon={skill.icon}
-                          level={skill.level}
-                        />
-
-                        <div className="flex-1">
-                          <div className="flex items-center justify-between">
-                            <span className="font-title text-sm text-gray-800">
-                              {skill.name}
-                            </span>
-                            <span className="font-display text-xs text-gray-600">
-                              Level {skill.level}
-                            </span>
-                          </div>
-
-                          <div className="flex items-center gap-2 mt-1">
-                            <div className="h-1.5 bg-white/30 backdrop-blur-sm rounded-full overflow-hidden flex-1">
-                              <motion.div
-                                initial={{ width: 0 }}
-                                animate={{ width: `${skill.progress}%` }}
-                                transition={{ duration: 1, ease: "easeOut" }}
-                                className={cn(
-                                  "h-full rounded-full",
-                                  "bg-gradient-to-r",
-                                  skill.color
-                                )}
-                              />
-                            </div>
-                            <span className="font-display text-xs text-gray-600">
-                              {skill.progress}%
-                            </span>
-                          </div>
+                    {activeTraining && (
+                      <div className="mt-2 bg-green-100/50 backdrop-blur-sm rounded-lg p-2 border border-green-200/50">
+                        <div className="flex items-center justify-center gap-1">
+                          <Timer className="w-3 h-3 text-green-500 animate-pulse" />
+                          <span className="text-green-700 text-xs font-title">
+                            Training: {formatTime(timeLeft || 0)}
+                          </span>
                         </div>
                       </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-
-              {/* Right Side - Training Options */}
-              <div className="w-2/3 bg-white/40 backdrop-blur-md flex flex-col">
-                <div className="p-3 border-b border-white/30">
-                  <div className="flex items-center justify-between">
-                    <h2 className="font-title text-sm text-gray-800 flex items-center gap-1.5">
-                      <Sparkles className="w-3.5 h-3.5 text-gray-700" />
-                      Training
-                    </h2>
-
-                    {skillFilter && (
-                      <button
-                        onClick={() => setSkillFilter(null)}
-                        className="flex items-center gap-1 text-xs font-display text-purple-600 hover:text-purple-800 transition-colors"
-                      >
-                        <Filter className="w-3 h-3" />
-                        Clear Filter: {skillFilter}
-                      </button>
                     )}
                   </div>
-                </div>
 
-                <div className="p-3 flex-grow">
-                  <div className="grid grid-cols-2 gap-2">
-                    <AnimatePresence mode="popLayout">
-                      {filteredTrainingPacks.map((pack) => {
-                        const isActive = activeTraining?.packId === pack.id;
-                        const isTargetSkillTraining =
-                          activeTraining?.targetSkill === pack.targetSkill;
-                        const isSelected = selectedTraining === pack.id;
-                        const targetSkill = SKILLS.find(
-                          (s) => s.name === pack.targetSkill
-                        );
+                  {/* Skills Section */}
+                  <div className="px-4 pb-4">
+                    <div className="flex items-center justify-between mb-3">
+                      <h2 className="font-title text-sm text-gray-800 flex items-center gap-1.5">
+                        <Trophy className="w-3.5 h-3.5 text-gray-700" />
+                        Skills
+                      </h2>
+                    </div>
 
-                        return (
-                          <motion.div
-                            key={pack.id}
-                            layout
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: -10 }}
-                            className={cn(
-                              "group",
-                              isTargetSkillTraining &&
-                                !isActive &&
-                                "opacity-50 pointer-events-none"
-                            )}
-                          >
-                            <div
-                              className={cn(
-                                "rounded-lg overflow-hidden transition-all duration-300 h-full cursor-pointer",
-                                isSelected
-                                  ? "bg-purple-500/20 border-2 border-purple-500"
-                                  : "bg-white/30 backdrop-blur-sm border border-white/30 hover:bg-white/40 hover:border-white/50"
-                              )}
-                              onClick={() => {
-                                if (!activeTraining) {
-                                  setSelectedTraining(
-                                    isSelected ? null : pack.id
-                                  );
-                                }
-                              }}
-                            >
-                              <div className="flex h-full">
-                                {/* Left Color Bar */}
-                                <div
+                    <div className="space-y-3">
+                      {SKILLS.map((skill) => (
+                        <div
+                          key={skill.name}
+                          className={cn(
+                            "flex items-center gap-3 p-2 rounded-lg transition-colors cursor-pointer",
+                            skillFilter === skill.name
+                              ? "bg-purple-100/40 backdrop-blur-sm border border-purple-200/40"
+                              : "bg-white/30 backdrop-blur-sm border border-white/20 hover:bg-white/40"
+                          )}
+                          onClick={() =>
+                            setSkillFilter(
+                              skillFilter === skill.name ? null : skill.name
+                            )
+                          }
+                          role="button"
+                        >
+                          <CircularProgress
+                            progress={skill.progress}
+                            color={skill.color}
+                            icon={skill.icon}
+                            level={skill.level}
+                          />
+
+                          <div className="flex-1">
+                            <div className="flex items-center justify-between">
+                              <span className="font-title text-sm text-gray-800">
+                                {skill.name}
+                              </span>
+                              <span className="font-display text-xs text-gray-600">
+                                Level {skill.level}
+                              </span>
+                            </div>
+
+                            <div className="flex items-center gap-2 mt-1">
+                              <div className="h-1.5 bg-white/30 backdrop-blur-sm rounded-full overflow-hidden flex-1">
+                                <motion.div
+                                  initial={{ width: 0 }}
+                                  animate={{ width: `${skill.progress}%` }}
+                                  transition={{ duration: 1, ease: "easeOut" }}
                                   className={cn(
-                                    "w-1 shrink-0",
-                                    "bg-gradient-to-b",
-                                    targetSkill?.color
+                                    "h-full rounded-full",
+                                    "bg-gradient-to-r",
+                                    skill.color
                                   )}
                                 />
+                              </div>
+                              <span className="font-display text-xs text-gray-600">
+                                {skill.progress}%
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
 
-                                {/* Content */}
-                                <div className="flex-1 p-2 flex flex-col relative">
-                                  {/* Selection indicator */}
-                                  {isSelected && (
-                                    <div className="absolute top-1 right-1 bg-purple-400/70 backdrop-blur-sm rounded-full p-0.5 border border-white/50">
-                                      <Check className="w-3 h-3 text-white" />
+                {/* Right Side - Training Options */}
+                <div className="w-2/3 bg-white/40 backdrop-blur-md flex flex-col">
+                  <div className="p-3 border-b border-white/30">
+                    <div className="flex items-center justify-between">
+                      <h2 className="font-title text-sm text-gray-800 flex items-center gap-1.5">
+                        <Sparkles className="w-3.5 h-3.5 text-gray-700" />
+                        Training
+                      </h2>
+
+                      {skillFilter && (
+                        <button
+                          onClick={() => setSkillFilter(null)}
+                          className="flex items-center gap-1 text-xs font-display text-purple-600 hover:text-purple-800 transition-colors"
+                        >
+                          <Filter className="w-3 h-3" />
+                          Clear Filter: {skillFilter}
+                        </button>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="p-3 flex-grow">
+                    <div className="grid grid-cols-2 gap-2">
+                      <AnimatePresence mode="popLayout">
+                        {filteredTrainingPacks.map((pack) => {
+                          const isActive = activeTraining?.packId === pack.id;
+                          const isTargetSkillTraining =
+                            activeTraining?.targetSkill === pack.targetSkill;
+                          const isSelected = selectedTraining === pack.id;
+                          const targetSkill = SKILLS.find(
+                            (s) => s.name === pack.targetSkill
+                          );
+
+                          return (
+                            <motion.div
+                              key={pack.id}
+                              layout
+                              initial={{ opacity: 0, y: 10 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              exit={{ opacity: 0, y: -10 }}
+                              className={cn(
+                                "group",
+                                isTargetSkillTraining &&
+                                  !isActive &&
+                                  "opacity-50 pointer-events-none"
+                              )}
+                            >
+                              <div
+                                className={cn(
+                                  "rounded-lg overflow-hidden transition-all duration-300 h-full cursor-pointer",
+                                  isSelected
+                                    ? "bg-purple-500/20 border-2 border-purple-500"
+                                    : "bg-white/30 backdrop-blur-sm border border-white/30 hover:bg-white/40 hover:border-white/50"
+                                )}
+                                onClick={() => {
+                                  if (!activeTraining) {
+                                    setSelectedTraining(
+                                      isSelected ? null : pack.id
+                                    );
+                                  }
+                                }}
+                              >
+                                <div className="flex h-full">
+                                  {/* Left Color Bar */}
+                                  <div
+                                    className={cn(
+                                      "w-1 shrink-0",
+                                      "bg-gradient-to-b",
+                                      targetSkill?.color
+                                    )}
+                                  />
+
+                                  {/* Content */}
+                                  <div className="flex-1 p-2 flex flex-col relative">
+                                    {/* Selection indicator */}
+                                    {isSelected && (
+                                      <div className="absolute top-1 right-1 bg-purple-400/70 backdrop-blur-sm rounded-full p-0.5 border border-white/50">
+                                        <Check className="w-3 h-3 text-white" />
+                                      </div>
+                                    )}
+
+                                    <div className="flex items-center gap-1.5 mb-1.5">
+                                      <div
+                                        className={cn(
+                                          "w-6 h-6 rounded-full flex items-center justify-center",
+                                          "bg-gradient-to-br",
+                                          targetSkill?.color
+                                        )}
+                                      >
+                                        <pack.icon className="w-3 h-3 text-white" />
+                                      </div>
+                                      <h3 className="font-title text-sm text-gray-800">
+                                        {pack.name}
+                                      </h3>
                                     </div>
-                                  )}
 
-                                  <div className="flex items-center gap-1.5 mb-1.5">
-                                    <div
-                                      className={cn(
-                                        "w-6 h-6 rounded-full flex items-center justify-center",
-                                        "bg-gradient-to-br",
-                                        targetSkill?.color
-                                      )}
-                                    >
-                                      <pack.icon className="w-3 h-3 text-white" />
-                                    </div>
-                                    <h3 className="font-title text-sm text-gray-800">
-                                      {pack.name}
-                                    </h3>
-                                  </div>
+                                    <p className="font-display text-xs mb-auto text-gray-700">
+                                      {pack.description}
+                                    </p>
 
-                                  <p className="font-display text-xs mb-auto text-gray-700">
-                                    {pack.description}
-                                  </p>
+                                    <div className="flex items-center justify-between mt-2">
+                                      <div className="flex items-center gap-3">
+                                        <div className="flex items-center gap-1">
+                                          <Timer className="w-3 h-3 text-gray-600" />
+                                          <span className="font-display text-xs text-gray-700">
+                                            {formatTime(pack.duration * 1000)}
+                                          </span>
+                                        </div>
+                                        <div className="flex items-center gap-1">
+                                          <TrendingUp className="w-3 h-3 text-gray-600" />
+                                          <span className="font-display text-xs text-gray-700">
+                                            +{pack.boostAmount}%
+                                          </span>
+                                        </div>
+                                      </div>
 
-                                  <div className="flex items-center justify-between mt-2">
-                                    <div className="flex items-center gap-3">
-                                      <div className="flex items-center gap-1">
-                                        <Timer className="w-3 h-3 text-gray-600" />
-                                        <span className="font-display text-xs text-gray-700">
-                                          {formatTime(pack.duration * 1000)}
+                                      <div className="bg-pink-100/40 backdrop-blur-sm rounded-full px-2 py-0.5 flex items-center gap-1 border border-pink-200/40">
+                                        <Coins className="w-3 h-3 text-pink-500" />
+                                        <span className="font-title text-xs text-pink-700">
+                                          {pack.cost}
                                         </span>
                                       </div>
-                                      <div className="flex items-center gap-1">
-                                        <TrendingUp className="w-3 h-3 text-gray-600" />
-                                        <span className="font-display text-xs text-gray-700">
-                                          +{pack.boostAmount}%
-                                        </span>
-                                      </div>
-                                    </div>
-
-                                    <div className="bg-pink-100/40 backdrop-blur-sm rounded-full px-2 py-0.5 flex items-center gap-1 border border-pink-200/40">
-                                      <Coins className="w-3 h-3 text-pink-500" />
-                                      <span className="font-title text-xs text-pink-700">
-                                        {pack.cost}
-                                      </span>
                                     </div>
                                   </div>
                                 </div>
                               </div>
-                            </div>
-                          </motion.div>
-                        );
-                      })}
-                    </AnimatePresence>
+                            </motion.div>
+                          );
+                        })}
+                      </AnimatePresence>
+                    </div>
                   </div>
-                </div>
 
-                {/* Fixed action bar at bottom */}
-                <div className="p-3 border-t border-white/30 bg-white/40 backdrop-blur-md">
-                  {selectedTraining ? (
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <div className="bg-purple-100/40 backdrop-blur-sm rounded-lg p-2 border border-purple-200/40">
-                          {selectedPack?.icon && (
-                            <selectedPack.icon className="w-5 h-5 text-purple-600" />
-                          )}
-                        </div>
-                        <div>
-                          <p className="font-title text-base text-gray-800">
-                            {selectedPack?.name}
-                          </p>
-                          <div className="flex items-center gap-2 font-display text-xs text-gray-700">
-                            <span>
-                              {formatTime(selectedPack?.duration || 0 * 1000)}
-                            </span>
-                            <span>•</span>
-                            <span>
-                              +{selectedPack?.boostAmount}%{" "}
-                              {selectedPack?.targetSkill}
-                            </span>
-                            <span>•</span>
-                            <span className="flex items-center gap-0.5">
-                              <Coins className="w-3 h-3" />
-                              {selectedPack?.cost}
-                            </span>
+                  {/* Fixed action bar at bottom */}
+                  <div className="p-3 border-t border-white/30 bg-white/40 backdrop-blur-md">
+                    {selectedTraining ? (
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <div className="bg-purple-100/40 backdrop-blur-sm rounded-lg p-2 border border-purple-200/40">
+                            {selectedPack?.icon && (
+                              <selectedPack.icon className="w-5 h-5 text-purple-600" />
+                            )}
+                          </div>
+                          <div>
+                            <p className="font-title text-base text-gray-800">
+                              {selectedPack?.name}
+                            </p>
+                            <div className="flex items-center gap-2 font-display text-xs text-gray-700">
+                              <span>
+                                {formatTime(selectedPack?.duration || 0 * 1000)}
+                              </span>
+                              <span>•</span>
+                              <span>
+                                +{selectedPack?.boostAmount}%{" "}
+                                {selectedPack?.targetSkill}
+                              </span>
+                              <span>•</span>
+                              <span className="flex items-center gap-0.5">
+                                <Coins className="w-3 h-3" />
+                                {selectedPack?.cost}
+                              </span>
+                            </div>
                           </div>
                         </div>
-                      </div>
 
-                      {/* Updated button to match Arrival Dock style */}
-                      <button
-                        onClick={handleStartTraining}
-                        disabled={!!activeTraining}
-                        className="bg-pink-500 hover:bg-pink-600 text-white font-title text-lg px-8 py-2 rounded-xl transition-colors"
-                      >
-                        Start Training
-                      </button>
-                    </div>
-                  ) : (
-                    <div className="text-center font-display text-sm text-gray-700">
-                      {activeTraining ? (
-                        <div className="flex items-center justify-center gap-2">
-                          <Timer className="w-4 h-4 text-green-500 animate-pulse" />
-                          <span className="text-green-700 font-title">
-                            Training in progress: {formatTime(timeLeft || 0)}
-                          </span>
-                        </div>
-                      ) : (
-                        <span>Select a training option to begin</span>
-                      )}
-                    </div>
-                  )}
+                        {/* Updated button to match Arrival Dock style */}
+                        <button
+                          onClick={handleStartTraining}
+                          disabled={!!activeTraining}
+                          className="bg-pink-500 hover:bg-pink-600 text-white font-title text-lg px-8 py-2 rounded-xl transition-colors"
+                        >
+                          Start Training
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="text-center font-display text-sm text-gray-700">
+                        {activeTraining ? (
+                          <div className="flex items-center justify-center gap-2">
+                            <Timer className="w-4 h-4 text-green-500 animate-pulse" />
+                            <span className="text-green-700 font-title">
+                              Training in progress: {formatTime(timeLeft || 0)}
+                            </span>
+                          </div>
+                        ) : (
+                          <span>Select a training option to begin</span>
+                        )}
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
+          )}
         </div>
       </div>
     </div>
