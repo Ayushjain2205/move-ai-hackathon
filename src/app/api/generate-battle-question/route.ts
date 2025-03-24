@@ -4,6 +4,7 @@ import { supabaseServer } from "@/lib/supabase-server";
 export async function POST(request: Request) {
   try {
     const { userAgent, opponentAgent } = await request.json();
+    console.log(userAgent, opponentAgent);
 
     // Generate a question based on agent traits
     const questions = [
