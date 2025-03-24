@@ -1,9 +1,8 @@
 import { NextResponse } from "next/server";
-import { supabaseServer } from "@/lib/supabase-server";
 
 export async function POST(request: Request) {
   try {
-    const { messages, currentAgent, opponent, question } = await request.json();
+    const { currentAgent, opponent } = await request.json();
 
     // Generate a response based on the agent's personality and the conversation
     const responses = [
